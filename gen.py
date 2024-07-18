@@ -126,6 +126,9 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
     table_name = list(db_structure.keys())[table_index]
     details = db_structure[table_name]
     class_name = pascal_case(table_name)
+
+    many = many_to_one(table_name)
+    one = one_to_many(table_name)
     # Determine primary keys
     primary_keys = determine_primary_keys(details)
     print(f"Primary keys for {table_name}: {primary_keys}")
@@ -144,6 +147,9 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
         f.write(f"import java.math.BigDecimal;\n")
         f.write(f"import java.time.*;\n\n")
 
+        for i in one:
+            f.write(f"import {package_name}.entity.{pascal_case(i)}")
+
         f.write(f"@Entity\n@Table(name = \"{table_name}\", schema = \"{schema}\")\n")
         f.write(f"public class {class_name} {{\n")
         for column in details['columns']:
@@ -151,9 +157,17 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             column_type = column['type']
             java_type = map_sql_type_to_java(column_type)
             if column_name in primary_keys:
-                f.write("@Id")
-            f.write(f"@Column(name=\"{column_name}\")")
+                f.write("@Id\n")
+            if column_name in many:
+                f.write("@ManyToOne\n")
+                f.write(f"@JoinColumn(name=\"{many[column_name]['reference_column'][0]}\")\n")
+            else: f.write(f"@Column(name=\"{column_name}\")\n")
             f.write(f"private {java_type} {camel_case(column_name)};\n\n")
+
+        for i in one:
+            f.write(f"@OneToMany(mappedBy = \"{table_name}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
+            f.write(f"private List<{pascal_case(i)}> {camel_case(i)};\n\n")
+
 
         # Generate getters and setters
         for column in details['columns']:
