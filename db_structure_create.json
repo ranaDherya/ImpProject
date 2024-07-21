@@ -1,0 +1,78 @@
+{
+    "actor": {
+        "columns": [
+            {
+                "name": "actor_id",
+                "type": "INTEGER",
+                "default": null,
+                "comment": null,
+                "nullable": false,
+                "autoincrement": false
+            },
+            {
+                "name": "film_id",
+                "type": "INTEGER",
+                "default": null,
+                "comment": null,
+                "nullable": true,
+                "autoincrement": false
+            }
+        ],
+        "primary_keys": {
+            "constrained_columns": [
+                "actor_id"
+            ],
+            "name": null
+        },
+        "foreign_keys": [
+            {
+                "name": "film_id",
+                "constrained_columns": [
+                    "film_id"
+                ],
+                "referred_schema": null,
+                "referred_table": "film",
+                "referred_columns": [
+                    "film_id"
+                ],
+                "options": {}
+            }
+        ],
+        "indexes": [
+            {
+                "name": "film_id_idx",
+                "column_names": [
+                    "film_id"
+                ],
+                "unique": false
+            }
+        ]
+    },
+    "film": {
+        "columns": [
+            {
+                "name": "film_id",
+                "type": "INTEGER",
+                "default": null,
+                "comment": null,
+                "nullable": false,
+                "autoincrement": false
+            },
+            {
+                "name": "film_name",
+                "type": "VARCHAR(255)",
+                "default": null,
+                "comment": null,
+                "nullable": true
+            }
+        ],
+        "primary_keys": {
+            "constrained_columns": [
+                "film_id"
+            ],
+            "name": null
+        },
+        "foreign_keys": [],
+        "indexes": []
+    }
+}
