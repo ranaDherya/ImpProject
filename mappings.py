@@ -5,13 +5,15 @@ def one_to_many(table_name):
         db_structure = json.load(file)
 
     # pk = db_structure[table_name]["primary_keys"]["constrained_columns"]
-    mapping = []
+    mapping = dict()
 
     for tbl in db_structure.keys():
         if table_name == tbl: continue
         for fk in db_structure[tbl]["foreign_keys"]:
             if fk["reference_table"] == table_name:
-                mapping.append(tbl)
+                mapping[tbl] = fk
+                # mapping[tbl]["table_name"] = tbl
+
                 break
 
     return mapping
@@ -28,5 +30,5 @@ def many_to_one(table_name):
     return mapping
 
 
-# print(one_to_many("FILM"))
-# print(many_to_one("FILM"))
+# print(one_to_many("ACTOR"))
+print(many_to_one("FILM_ACTOR"))

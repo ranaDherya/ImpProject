@@ -121,6 +121,45 @@ def determine_primary_keys(details):
 
     return primary_keys
 
+
+# Function to generate ID class for Entity
+def generate_id_class(db_structure, table_index, primary_keys, many):
+    table_name = list(db_structure.keys())[table_index]
+    details = db_structure[table_name]
+    class_name = pascal_case(table_name)
+
+    entity_dir = os.path.join(output_dir, 'entity')
+    os.makedirs(entity_dir, exist_ok=True)
+
+    # Generate class
+    entity_path = os.path.join(entity_dir, f"{class_name}Id.java")
+    
+    with open(entity_path, 'w') as f:
+        f.write(f"package {package_name}.entity;\n\n")
+        
+        f.write("import java.io.Serializable;\n")
+        f.write(f"import java.util.Objects;\n\n")
+
+        f.write(f"public class {class_name}Id implements Serializable {{\n")  
+        for pk in primary_keys:
+            f.write(f"private {pascal_case(many[pk]['reference_table'])} {camel_case(pk)};\n")
+
+        # Getters
+        for pk in primary_keys:
+            f.write(f"public {pascal_case(many[pk]['reference_table'])} get{pascal_case(pk)}() {{\n")
+            f.write(f"return this.{camel_case(pk)};\n")
+            f.write("}\n\n")
+        # Setters
+        for pk in primary_keys:
+            f.write(f"public void set{pascal_case(pk)} ({pascal_case(many[pk]['reference_table'])} {camel_case(pk)}) {{\n")
+            f.write(f"this.{camel_case(pk)}={camel_case(pk)};\n")
+            f.write("}\n\n")
+
+        f.write("}")
+
+
+
+
 # Function to generate the entity class
 def generate_entity_class(db_structure, output_dir, table_index, package_name, schema):
     table_name = list(db_structure.keys())[table_index]
@@ -142,15 +181,20 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
     
     with open(entity_path, 'w') as f:
         f.write(f"package {package_name}.entity;\n\n")
-        f.write("import javax.persistence.*;\n")
+        f.write("import jakarta.persistence.*;\n")
         f.write(f"import java.util.*;\n")
         f.write(f"import java.math.BigDecimal;\n")
         f.write(f"import java.time.*;\n\n")
+        f.write(f"import com.fasterxml.jackson.annotation.JsonBackReference;\n")
+        f.write(f"import com.fasterxml.jackson.annotation.JsonManagedReference;\n\n")
 
-        for i in one:
-            f.write(f"import {package_name}.entity.{pascal_case(i)}")
+        for i in one.keys():
+            f.write(f"import {package_name}.entity.{pascal_case(i)};\n")
 
         f.write(f"@Entity\n@Table(name = \"{table_name}\", schema = \"{schema}\")\n")
+        if len(primary_keys)>1:
+            generate_id_class(db_structure, table_index, primary_keys, many)
+            f.write(f"@IdClass({class_name}Id.class)\n")
         f.write(f"public class {class_name} {{\n")
         for column in details['columns']:
             column_name = column['name']
@@ -160,12 +204,16 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
                 f.write("@Id\n")
             if column_name in many:
                 f.write("@ManyToOne\n")
-                f.write(f"@JoinColumn(name=\"{many[column_name]['reference_column'][0]}\")\n")
-            else: f.write(f"@Column(name=\"{column_name}\")\n")
-            f.write(f"private {java_type} {camel_case(column_name)};\n\n")
+                f.write(f"@JoinColumn(name=\"{many[column_name]['column_names'][0]}\", insertable = false, updatable = false)\n")
+                f.write(f"@JsonBackReference\n")
+                f.write(f"private {pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)};\n\n")
+            else: 
+                f.write(f"@Column(name=\"{column_name}\")\n")
+                f.write(f"private {java_type} {camel_case(column_name)};\n\n")
 
-        for i in one:
-            f.write(f"@OneToMany(mappedBy = \"{table_name}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
+        for i in one.keys():
+            f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['column_names'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
+            f.write(f"@JsonManagedReference\n")
             f.write(f"private List<{pascal_case(i)}> {camel_case(i)};\n\n")
 
 
@@ -178,12 +226,21 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             camel_case_name = camel_case(column_name)
 
             # Getter
-            f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
+            if column_name in many:
+                f.write(f"public {pascal_case(many[column_name]['reference_table'])} get{pascal_case(column_name)}() {{\n")
+            elif column_name in one.keys():
+                f.write(f"public List<{pascal_case(column_name)}> get{pascal_case(column_name)}() {{\n")
+            else: f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
             f.write(f"      return this.{camel_case_name};\n")
             f.write("}\n\n")
 
             # Setter
-            f.write(f"public void set{pascal_case(column_name)}({java_type} {camel_case_name}) {{\n")
+            if column_name in many:
+                f.write(f"public void set{pascal_case(column_name)}({pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)}) {{\n")
+            elif column_name in one.keys():
+                f.write(f"public void set{pascal_case(column_name)}(List<{pascal_case(column_name)}> {camel_case(column_name)}) {{\n")
+            else: 
+                f.write(f"public void set{pascal_case(column_name)}({java_type} {camel_case_name}) {{\n")
             f.write(f"      this.{camel_case_name} = {camel_case_name};\n")
             f.write("}\n\n")
 
@@ -206,7 +263,7 @@ def generate_repository_class(db_structure, output_dir, table_index, package_nam
         with open(repository_path, 'w') as f:
             f.write(f"package {package_name}.repository;\n\n")
             f.write(f"import org.springframework.data.jpa.repository.JpaRepository;\n")
-            f.write(f"import {package_name}.entity.{class_name};]\n\n")
+            f.write(f"import {package_name}.entity.{class_name};\n\n")
             f.write(f"public interface {class_name}Repository extends JpaRepository<{class_name}, Long> {{\n")
             f.write("}\n")
 
@@ -328,8 +385,10 @@ def copy_files_to_destination(src_dir, dest_dir):
 ######################## Define output directory #############################
 
 current_dir = os.getcwd()
-output_dir = os.path.join(current_dir, 'src/main/java/com')
-package_name = "com.wellsfargo.lpo"
+output_dir_in = input("Enter output directory: ")
+output_dir = os.path.join(current_dir, output_dir_in)
+package_name_in = input("Enter package name: ")
+package_name = package_name_in
 
 for table_index in range(len(db_structure)):
 
@@ -350,7 +409,7 @@ for table_index in range(len(db_structure)):
     print("Controller class generated successfully.")
 
 # Define source and destination libs
-src_dir = os.path.join(current_dir, 'src/,ain/java/com/')
+src_dir = os.path.join(current_dir, output_dir_in)
 dest_dir = r""
 
 # Call the function to copy the files

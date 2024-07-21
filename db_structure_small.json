@@ -1,0 +1,250 @@
+{
+    "FILM": {
+      "columns": [
+        {
+          "name": "FILM_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": true,
+          "comment": null,
+          "identity": {
+            "start": 1,
+            "increment": 1
+          }
+        },
+        {
+          "name": "TITLE",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "DESCRIPTION",
+          "type": "TEXT",
+          "nullable": true,
+          "default": null,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "RELEASE_YEAR",
+          "type": "YEAR",
+          "nullable": true,
+          "default": null,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "LANGUAGE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing LANGUAGE_ID in LANGUAGE"
+        },
+        {
+          "name": "ORIGINAL_LANGUAGE_ID",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing LANGUAGE_ID in LANGUAGE"
+        },
+        {
+          "name": "RENTAL_DURATION",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": 3,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "RENTAL_RATE",
+          "type": "DECIMAL(4,2)",
+          "nullable": false,
+          "default": 4.99,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "LENGTH",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "REPLACEMENT_COST",
+          "type": "DECIMAL(5,2)",
+          "nullable": false,
+          "default": 19.99,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "RATING",
+          "type": "VARCHAR(10)",
+          "nullable": true,
+          "default": "G",
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "SPECIAL_FEATURES",
+          "type": "SET('Trailers','Commentaries','Deleted Scenes','Behind the Scenes')",
+          "nullable": true,
+          "default": null,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "LAST_UPDATE",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "GETDATE()",
+          "autoincrement": false,
+          "comment": null
+        }
+      ],
+      "primary_keys": {
+        "name": "FILM_PK",
+        "constrained_columns": ["FILM_ID"]
+      },
+      "foreign_keys": [],
+      "indexes": []
+    },
+    "INVENTORY": {
+      "columns": [
+        {
+          "name": "INVENTORY_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": true,
+          "comment": null,
+          "identity": {
+            "start": 1,
+            "increment": 1
+          }
+        },
+        {
+          "name": "FILM_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing FILM_ID in FILM"
+        },
+        {
+          "name": "STORE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing STORE_ID in STORE"
+        },
+        {
+          "name": "LAST_UPDATE",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "GETDATE()",
+          "autoincrement": false,
+          "comment": null
+        }
+      ],
+      "primary_keys": {
+        "name": "INVENTORY_PK",
+        "constrained_columns": ["INVENTORY_ID"]
+      },
+      "foreign_keys": [
+        {
+          "name": "INVENTORY_FILM_FK",
+          "column_names": ["FILM_ID"],
+          "reference_table": "FILM",
+          "reference_column": ["FILM_ID"]
+        }
+      ],
+      "indexes": []
+    },
+    "RENTAL": {
+      "columns": [
+        {
+          "name": "RENTAL_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": true,
+          "comment": null,
+          "identity": {
+            "start": 1,
+            "increment": 1
+          }
+        },
+        {
+          "name": "RENTAL_DATE",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "GETDATE()",
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "INVENTORY_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing INVENTORY_ID in INVENTORY"
+        },
+        {
+          "name": "CUSTOMER_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing CUSTOMER_ID in CUSTOMER"
+        },
+        {
+          "name": "RETURN_DATE",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": null,
+          "autoincrement": false,
+          "comment": null
+        },
+        {
+          "name": "STAFF_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "autoincrement": false,
+          "comment": "Foreign key referencing STAFF_ID in STAFF"
+        },
+        {
+          "name": "LAST_UPDATE",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "GETDATE()",
+          "autoincrement": false,
+          "comment": null
+        }
+      ],
+      "primary_keys": {
+        "name": "RENTAL_PK",
+        "constrained_columns": ["RENTAL_ID"]
+      },
+      "foreign_keys": [
+        {
+          "name": "RENTAL_INVENTORY_FK",
+          "column_names": ["INVENTORY_ID"],
+          "reference_table": "INVENTORY",
+          "reference_column": ["INVENTORY_ID"]
+        }
+      ],
+      "indexes": []
+    }
+  }
