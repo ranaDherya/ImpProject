@@ -72,17 +72,20 @@ from mappings import one_to_many, many_to_one
 
 # print("Database schema saved")
 
+many = dict()
+one = dict()
+
 
 with open('db_structure.json', 'r') as file:
     db_structure = json.load(file)
 
 # Utility functions
 
-def camel_case(snake_str):
+def camel_case(snake_str): # camelCase
     components = snake_str.split("_")
-    return components[0] + ''.join(x.title() for x in components[1:])
+    return components[0].lower() + ''.join(x.title() for x in components[1:])
 
-def pascal_case(snake_str):
+def pascal_case(snake_str): # PascalCase
     return ''.join(word.title() for word in snake_str.split("_"))
 
 # Java type mapping
@@ -123,9 +126,9 @@ def determine_primary_keys(details):
 
 
 # Function to generate ID class for Entity
-def generate_id_class(db_structure, table_index, primary_keys, many):
+def generate_id_class(db_structure, output_dir, table_index, primary_keys):
     table_name = list(db_structure.keys())[table_index]
-    details = db_structure[table_name]
+    # details = db_structure[table_name]
     class_name = pascal_case(table_name)
 
     entity_dir = os.path.join(output_dir, 'entity')
@@ -158,6 +161,104 @@ def generate_id_class(db_structure, table_index, primary_keys, many):
         f.write("}")
 
 
+# Function to generate the DTO class
+def generate_dto_class(db_structure, output_dir, table_index, package_name):
+    table_name = list(db_structure.keys())[table_index]
+    details = db_structure[table_name]
+    class_name = pascal_case(table_name)
+
+    dto_dir = os.path.join(output_dir, 'dto')
+    os.makedirs(dto_dir, exist_ok=True)
+
+    # DTO class
+    dto_path = os.path.join(dto_dir, f"{class_name}DTO.java")
+    with open(dto_path, 'w') as f:
+        f.write(f"package {package_name}.dto;\n\n")
+
+        f.write(f"import {package_name}.entity.{class_name};\n")
+        f.write("import java.util.List;\n")
+        f.write("import java.util.stream.Collectors;\n\n")
+
+        f.write(f"public class {class_name}DTO {{\n")
+        for column in details["columns"]:
+            column_name = column['name']
+            column_type = column['type']
+            java_type = map_sql_type_to_java(column_type)
+            if column_name not in many:
+                f.write(f"private {java_type} {camel_case(column_name)};\n")
+
+        for column in one.keys():
+            f.write(f"private List<{pascal_case(column)}DTO> {camel_case(column)};\n")
+
+        f.write("\n") # Adds Empty line
+
+        # Constructors
+        f.write(f"public {class_name}DTO() {{")
+        f.write("}\n\n")
+        # f.write(f"public {class_name}DTO ({class_name} {camel_case(table_name)}) {{\n")
+        # for column in details["columns"]:
+        #     column_name = column['name']
+        #     column_type = column['type']
+        #     if column_name not in many:
+        #         f.write(f"this.{camel_case(column_name)} = {camel_case(table_name)}.get{pascal_case(column_name)}();\n")
+        # for column in one.keys():
+        #     f.write(f"this.{camel_case(column)} = {camel_case(table_name)}.get{pascal_case(column)}().stream().map({pascal_case(column)}DTO::new).collect(Collectors.toList());\n")
+
+        # f.write("}\n\n")
+
+        # convertToDTO function
+        f.write(f"public static {class_name}DTO convertToDTO({class_name} {camel_case(table_name)}) {{\n")
+        f.write(f"{class_name}DTO {camel_case(table_name)}DTO = new {class_name}DTO();\n")
+        for column in details['columns']:
+            column_name = column['name']
+            if column_name in many: continue
+            f.write(f"{camel_case(table_name)}DTO.set{pascal_case(column_name)}({camel_case(table_name)}.get{pascal_case(column_name)}());\n")
+        for column in one.keys():
+            f.write(f"List<{pascal_case(column)}DTO> {camel_case(column)}DTO = {camel_case(table_name)}.get{pascal_case(column)}().stream().map({pascal_case(column)}DTO::convertToDTO).collect(Collectors.toList());\n")
+            f.write(f"{camel_case(table_name)}DTO.set{pascal_case(column)}({camel_case(column)}DTO);\n")
+
+        f.write(f"return {camel_case(table_name)}DTO;\n")
+        f.write("}\n\n")
+
+        # Getters and Setters
+        for column in details['columns']:
+            column_name = column['name']
+            column_type = column['type']
+
+            java_type = map_sql_type_to_java(column_type)
+            camel_case_name = camel_case(column_name)
+
+            # Getter
+            if column_name in many:
+                # f.write(f"public {pascal_case(many[column_name]['reference_table'])} get{pascal_case(column_name)}() {{\n")
+                continue
+            else: f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
+            f.write(f"      return this.{camel_case_name};\n")
+            f.write("}\n\n")
+
+            # Setter
+            if column_name in many:
+                # f.write(f"public void set{pascal_case(column_name)}({pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)}) {{\n")
+                continue
+            else: 
+                f.write(f"public void set{pascal_case(column_name)}({java_type} {camel_case_name}) {{\n")
+            f.write(f"      this.{camel_case_name} = {camel_case_name};\n")
+            f.write("}\n\n")
+
+        
+        # Getter setter for one_to_many
+        for column in one.keys():
+            # Getter
+            f.write(f"public List<{pascal_case(column)}DTO> get{pascal_case(column)}() {{\n")
+            f.write(f"      return this.{camel_case(column)};\n")
+            f.write("}\n\n")
+            # Setter
+            f.write(f"public void set{pascal_case(column)}(List<{pascal_case(column)}DTO> {camel_case(column)}) {{\n")
+            f.write(f"      this.{camel_case(column)} = {camel_case(column)};\n")
+            f.write("}\n\n")
+
+        f.write("}\n")
+        print(f"Generate DTO Class for {class_name}DTO")
 
 
 # Function to generate the entity class
@@ -166,8 +267,9 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
     details = db_structure[table_name]
     class_name = pascal_case(table_name)
 
-    many = many_to_one(table_name)
-    one = one_to_many(table_name)
+    # many = many_to_one(table_name)
+    # one = one_to_many(table_name)
+
     # Determine primary keys
     primary_keys = determine_primary_keys(details)
     print(f"Primary keys for {table_name}: {primary_keys}")
@@ -181,20 +283,21 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
     
     with open(entity_path, 'w') as f:
         f.write(f"package {package_name}.entity;\n\n")
+
         f.write("import jakarta.persistence.*;\n")
-        f.write(f"import java.util.*;\n")
-        f.write(f"import java.math.BigDecimal;\n")
-        f.write(f"import java.time.*;\n\n")
-        f.write(f"import com.fasterxml.jackson.annotation.JsonBackReference;\n")
-        f.write(f"import com.fasterxml.jackson.annotation.JsonManagedReference;\n\n")
+        f.write(f"import java.util.*;\n\n")
 
         for i in one.keys():
             f.write(f"import {package_name}.entity.{pascal_case(i)};\n")
 
         f.write(f"@Entity\n@Table(name = \"{table_name}\", schema = \"{schema}\")\n")
+
+        # Generate ID Class if composite primary key
         if len(primary_keys)>1:
-            generate_id_class(db_structure, table_index, primary_keys, many)
+            generate_id_class(db_structure,output_dir,  table_index, primary_keys)
             f.write(f"@IdClass({class_name}Id.class)\n")
+        
+
         f.write(f"public class {class_name} {{\n")
         for column in details['columns']:
             column_name = column['name']
@@ -205,7 +308,6 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             if column_name in many:
                 f.write("@ManyToOne\n")
                 f.write(f"@JoinColumn(name=\"{many[column_name]['column_names'][0]}\", insertable = false, updatable = false)\n")
-                f.write(f"@JsonBackReference\n")
                 f.write(f"private {pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)};\n\n")
             else: 
                 f.write(f"@Column(name=\"{column_name}\")\n")
@@ -213,8 +315,8 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
 
         for i in one.keys():
             f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['column_names'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
-            f.write(f"@JsonManagedReference\n")
             f.write(f"private List<{pascal_case(i)}> {camel_case(i)};\n\n")
+
 
 
         # Generate getters and setters
@@ -228,8 +330,6 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             # Getter
             if column_name in many:
                 f.write(f"public {pascal_case(many[column_name]['reference_table'])} get{pascal_case(column_name)}() {{\n")
-            elif column_name in one.keys():
-                f.write(f"public List<{pascal_case(column_name)}> get{pascal_case(column_name)}() {{\n")
             else: f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
             f.write(f"      return this.{camel_case_name};\n")
             f.write("}\n\n")
@@ -237,16 +337,27 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             # Setter
             if column_name in many:
                 f.write(f"public void set{pascal_case(column_name)}({pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)}) {{\n")
-            elif column_name in one.keys():
-                f.write(f"public void set{pascal_case(column_name)}(List<{pascal_case(column_name)}> {camel_case(column_name)}) {{\n")
             else: 
                 f.write(f"public void set{pascal_case(column_name)}({java_type} {camel_case_name}) {{\n")
             f.write(f"      this.{camel_case_name} = {camel_case_name};\n")
             f.write("}\n\n")
 
+
+        # Getter setter for one_to_many
+        for column in one.keys():
+            # Getter\
+            f.write(f"public List<{pascal_case(column)}> get{pascal_case(column)}() {{\n")
+            f.write(f"      return this.{camel_case(column)};\n")
+            f.write("}\n\n")
+            # Setter
+            f.write(f"public void set{pascal_case(column)}(List<{pascal_case(column)}> {camel_case(column)}) {{\n")
+            f.write(f"      this.{camel_case(column)} = {camel_case(column)};\n")
+            f.write("}\n\n")
+
         f.write("}\n")
 
         print(f"Entity class {class_name}.java generated successfully.")
+        
 
 # Function to generate the repository interface for the first table in the schema
 def generate_repository_class(db_structure, output_dir, table_index, package_name):
@@ -276,6 +387,7 @@ def generate_repository_class(db_structure, output_dir, table_index, package_nam
 def generate_service_classes(db_structure, output_dir, table_index, package_name):
     try:
         table_name = list(db_structure.keys())[table_index]
+        # details = db_structure[table_name]
         class_name = pascal_case(table_name)
 
         # Create service directories
@@ -289,10 +401,10 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
         service_interface_path = os.path.join(service_dir, f"{class_name}Service.java")
         with open(service_interface_path, 'w') as f:
             f.write(f"package {package_name}.service;\n\n")
-            f.write(f"import {package_name}.entity.{class_name}; \n\n")
+            f.write(f"import {package_name}.dto.{class_name}DTO; \n\n")
             f.write(f"import java.util.List;\n\n")
             f.write(f"public interface {class_name}Service {{\n")
-            f.write(f"List<{class_name}>findAll();\n")
+            f.write(f"List<{class_name}DTO>findAll();\n")
             f.write("}\n")
 
         print(f"Service interface {class_name}Service.java generated successfully.")
@@ -301,20 +413,30 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
         service_impl_path = os.path.join(service_impl_dir, f"{class_name}ServiceImpl.java")
         with open(service_impl_path, 'w') as f:
             f.write(f"package {package_name}.service.impl;\n\n")
+
+            f.write(f"import {package_name}.dto.{class_name}DTO;\n")
             f.write(f"import {package_name}.entity.{class_name};\n")
             f.write(f"import {package_name}.repository.{class_name}Repository;\n")
-            f.write(f"import {package_name}.service.{class_name}Service;\n")
-            f.write(f"import org.springframework.beans.factory.annotation.Autowired;\n")
-            f.write(f"import org.springframework.stereotype.Service;\n\n")
-            f.write(f"import java.util.List;\n\n")
+            f.write(f"import {package_name}.service.{class_name}Service;\n\n")
+
+            f.write("import org.springframework.beans.factory.annotation.Autowired;\n")
+            f.write("import org.springframework.stereotype.Service;\n\n")
+
+            f.write("import java.util.List;\n")
+            f.write("import java.util.stream.Collectors;\n\n")
+
             f.write(f"@Service\n")
             f.write(f"public class {class_name}ServiceImpl implements {class_name}Service {{\n\n")
             f.write(f"      @Autowired\n")
-            f.write(f"      private {class_name}Repository {table_name}Repository;\n\n")
+            f.write(f"      private {class_name}Repository {camel_case(table_name)}Repository;\n\n")
+
             f.write(f"      @Override\n")
-            f.write(f"      public List<{class_name}> findAll() {{\n")
-            f.write(f"          return {table_name}Repository.findAll();\n")
+            f.write(f"      public List<{class_name}DTO> findAll() {{\n")
+            f.write(f"          List<{class_name}> {camel_case(table_name)} = {camel_case(table_name)}Repository.findAll();\n")
+            f.write(f"          return {camel_case(table_name)}.stream().map({class_name}DTO::convertToDTO).collect(Collectors.toList());\n")
             f.write(f"      }}\n")
+            
+
             f.write("}\n")
 
         print(f"Service implementation {class_name}ServiceImpl.java generated successfully.")
@@ -337,7 +459,7 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
         controller_path = os.path.join(controller_dir, f"{class_name}Controller.java")
         with open(controller_path, 'w') as f:
             f.write(f"package {package_name}.controller;\n\n")
-            f.write(f"import {package_name}.entity.{class_name};\n")
+            f.write(f"import {package_name}.dto.{class_name}DTO;\n")
             f.write(f"import {package_name}.service.{class_name}Service;\n")
             f.write(f"import org.springframework.beans.factory.annotation.Autowired;\n")
             f.write(f"import org.springframework.web.bind.annotation.GetMapping;\n")
@@ -348,10 +470,10 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write(f"@RequestMapping(\"{table_name}\")\n")
             f.write(f"public class {class_name}Controller {{\n\n")
             f.write(f"      @Autowired\n")
-            f.write(f"      private {class_name}Service {table_name}Service;\n\n")
+            f.write(f"      private {class_name}Service {camel_case(table_name)}Service;\n\n")
             f.write(f"      @GetMapping\n")
-            f.write(f"      public List<{class_name}> findAll() {{\n")
-            f.write(f"          return {table_name}Service.findAll();\n")
+            f.write(f"      public List<{class_name}DTO> findAll() {{\n")
+            f.write(f"          return {camel_case(table_name)}Service.findAll();\n")
             f.write(f"      }}\n")
             f.write("}\n")
 
@@ -385,16 +507,26 @@ def copy_files_to_destination(src_dir, dest_dir):
 ######################## Define output directory #############################
 
 current_dir = os.getcwd()
-output_dir_in = input("Enter output directory: ")
-output_dir = os.path.join(current_dir, output_dir_in)
-package_name_in = input("Enter package name: ")
-package_name = package_name_in
+# output_dir_in = input("Enter output directory: ")
+# output_dir = os.path.join(current_dir, output_dir_in)
+# package_name_in = input("Enter package name: ")
+# package_name = package_name_in
+output_dir = os.path.join(current_dir, "src/main/java/com/example/demo")
+package_name = "com.example.demo"
 
 for table_index in range(len(db_structure)):
+
+    table_name = list(db_structure.keys())[table_index]
+    many = many_to_one(table_name)
+    one = one_to_many(table_name)
 
     # Entity
     generate_entity_class(db_structure, output_dir, table_index, package_name, "exception.dbo")
     print("Entity class generated successfully.")
+
+    # DTO
+    generate_dto_class(db_structure, output_dir, table_index, package_name)
+    print("DTO class generated successfully.")
 
     # Repository
     generate_repository_class(db_structure, output_dir, table_index, package_name)
@@ -409,7 +541,7 @@ for table_index in range(len(db_structure)):
     print("Controller class generated successfully.")
 
 # Define source and destination libs
-src_dir = os.path.join(current_dir, output_dir_in)
+src_dir = os.path.join(current_dir, output_dir)
 dest_dir = r""
 
 # Call the function to copy the files
