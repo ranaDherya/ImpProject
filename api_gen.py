@@ -274,7 +274,8 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"import {package_name}.dto.{class_name}DTO; \n\n")
             f.write(f"import java.util.List;\n\n")
             f.write(f"public interface {class_name}Service {{\n")
-            f.write(f"List<{class_name}DTO>findAll();\n")
+            f.write(f"List<{class_name}DTO> findAll();\n")
+            f.write(f"List<{class_name}DTO> findById(Long id);\n")
             f.write("}\n")
 
         print(f"Service interface {class_name}Service.java generated successfully.")
@@ -294,6 +295,9 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
 
             f.write("import java.util.List;\n")
             f.write("import java.util.stream.Collectors;\n\n")
+            f.write("import java.util.Collections;\n")
+            f.write("import java.util.List;\n")
+            f.write("import java.util.Optional;\n")
 
             f.write(f"@Service\n")
             f.write(f"public class {class_name}ServiceImpl implements {class_name}Service {{\n\n")
@@ -305,6 +309,12 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"          List<{class_name}> {camel_case(table_name)} = {camel_case(table_name)}Repository.findAll();\n")
             f.write(f"          return {camel_case(table_name)}.stream().map({class_name}DTO::convertToDTO).collect(Collectors.toList());\n")
             f.write(f"      }}\n")
+
+            f.write(f"      @Override\n")
+            f.write(f"      public List<{class_name}DTO> findById(Long id){{\n")
+            f.write(f"          Optional<{class_name}> {camel_case(table_name)} = {camel_case(table_name)}Repository.findById(id);\n")
+            f.write(f"          return {camel_case(table_name)}.map(f -> Collections.singletonList({class_name}DTO.convertToDTO(f))).orElse(Collections.emptyList());\n")
+            f.write("      }\n\n")
             
 
             f.write("}\n")
@@ -334,6 +344,7 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write(f"import org.springframework.beans.factory.annotation.Autowired;\n")
             f.write(f"import org.springframework.web.bind.annotation.GetMapping;\n")
             f.write(f"import org.springframework.web.bind.annotation.RequestMapping;\n")
+            f.write(f"import org.springframework.web.bind.annotation.PathVariable;\n")
             f.write(f"import org.springframework.web.bind.annotation.RestController;\n\n")
             f.write(f"import java.util.List;\n\n")
             f.write(f"@RestController\n")
@@ -345,6 +356,13 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write(f"      public List<{class_name}DTO> findAll() {{\n")
             f.write(f"          return {camel_case(table_name)}Service.findAll();\n")
             f.write("      }\n")
+            f.write(r'      @GetMapping("/{id}")')
+            f.write("\n")
+            f.write(f"      public List<{class_name}DTO> findById(@PathVariable Long id){{\n")
+            f.write(f"          List<{class_name}DTO> {camel_case(table_name)} = {camel_case(table_name)}Service.findById(id);\n")
+            f.write(f"          return {camel_case(table_name)}.isEmpty() ? null : {camel_case(table_name)};\n")
+            f.write("      }\n\n")
+
             f.write("}\n")
 
         print(f"Controller class {class_name}Controller.java generated successfully.")
@@ -381,8 +399,8 @@ current_dir = os.getcwd()
 # output_dir = os.path.join(current_dir, output_dir_in)
 # package_name_in = input("Enter package name: ")
 # package_name = package_name_in
-output_dir = os.path.join(current_dir, "src/main/java/com/example/demo")
-package_name = "com.example.demo"
+output_dir = os.path.join(current_dir, "src/main/java/com/wellsfargo/demo")
+package_name = "com.wellsfargo.demo"
 
 for table_index in range(len(db_structure)):
 
@@ -412,7 +430,7 @@ for table_index in range(len(db_structure)):
 
 # Define source and destination libs
 src_dir = os.path.join(current_dir, output_dir)
-dest_dir = r""
+dest_dir = r"C:\Users\ranaDherya\Desktop\api-gen\src\main\java\com\wellsfargo\demo"
 
 # Call the function to copy the files
-# copy_files_to_destination(src_dir, dest_dir)
+copy_files_to_destination(src_dir, dest_dir)
