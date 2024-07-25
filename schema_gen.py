@@ -22,15 +22,6 @@ if engine is None:
 
 inspector = inspect(engine)
 
-def camel_case(snake_str):
-    components = snake_str.split('_')
-    if len(components) == 0:
-        return snake_str
-    return components[0] + ''.join(x.title() for x in components[1:])
-
-def pascal_case(snake_str):
-    return ''.join(x.title() for x in snake_str.split('_'))
-
 def get_table_details(table_name):
     columns = inspector.get_columns(table_name)
     primary_keys = inspector.get_pk_constraint(table_name)
@@ -55,7 +46,7 @@ def get_database_structure():
     return db_structure
 
 db_structure = get_database_structure()
-with open('db_structure_create.json', 'w') as file:
+with open('db_structure.json', 'w') as file:
     json.dump(db_structure, file, indent=4, default=str)
 
 print("Database schema saved")

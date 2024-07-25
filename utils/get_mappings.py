@@ -1,23 +1,21 @@
 import json 
 
+# Finds one to many relationships for input table
 def one_to_many(table_name):
     with open('db_structure.json', 'r') as file:
         db_structure = json.load(file)
 
-    # pk = db_structure[table_name]["primary_keys"]["constrained_columns"]
     mapping = dict()
-
     for tbl in db_structure.keys():
         if table_name == tbl: continue
         for fk in db_structure[tbl]["foreign_keys"]:
             if fk["reference_table"] == table_name:
                 mapping[tbl] = fk
-                # mapping[tbl]["table_name"] = tbl
-
                 break
 
     return mapping
 
+# Finds many to one relationships for input table
 def many_to_one(table_name):
     with open('db_structure.json', 'r') as file:
         db_structure = json.load(file)
@@ -29,6 +27,5 @@ def many_to_one(table_name):
 
     return mapping
 
-
 # print(one_to_many("ACTOR"))
-print(many_to_one("FILM_ACTOR"))
+# print(many_to_one("FILM_ACTOR"))

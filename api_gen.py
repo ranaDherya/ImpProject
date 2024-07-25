@@ -1,134 +1,21 @@
-from sqlalchemy import create_engine, MetaData, inspect
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.engine.reflection import Inspector
 import json
 import os
 import shutil
 
-from mappings import one_to_many, many_to_one
+from utils.get_mappings import one_to_many, many_to_one
+from utils.conversions import camel_case, pascal_case, determine_primary_keys, map_sql_type_to_java
 
-# DATABASE_URL = ''
-
-
-# def connect_to_database():
-#     try:
-#         engine = create_engine(DATABASE_URL.format(password="0908"))
-#         metadata = MetaData()
-#         metadata.reflect(bind=engine)
-
-#         print("Database connection successfull")
-
-#         return engine
-#     except Exception as e:
-#         print(e)
-#         return None
-
-
-# engine = connect_to_database()
-# inspector = inspect(engine)
-
-# if engine is None or inspector is None:
-#     print("Connection to database failed")
-#     exit()
-
-
-# def camel_case(snake_str):
-#     components = snake_str.split('_')
-#     return components[8] + ''.join(x.titlle() for x in components[1:])
-
-
-# def pascal_case(snake_str):
-#     return ''.join(x.title() for x in snake_str.split('_'))
-
-
-# def get_table_details(table_name):
-#     columns = inspector.get_columns(table_name)
-#     primary_keys = inspector.get_pk_constraint(table_name)
-#     foreign_keys = inspector.get_foreign_keys(table_name)
-#     indexes = inspector.get_indexes(table_name)
-
-#     table_info = {
-#         "columns": columns,
-#         "primary_keys": primary_keys,
-#         "foreign_keys": foreign_keys,
-#         "indexes": indexes
-#     }
-#     return table_info
-
-
-# def get_database_structure():
-#     tables = inspector.get_table_names()
-#     db_structure = {}
-#     for table in tables:
-#         table_details = get_table_details(table)
-#         if (table_details['columns']):
-#             db_structure[table] = table_details
-#     return db_structure
-
-
-# db_structure = get_database_structure()
-# with open('db_structure.json', 'w') as file:
-#     json.dump(db_structure, file, indent=4, default=str)
-
-# print("Database schema saved")
-
+# Stores many to one relationships
 many = dict()
+# Stores one to many relationships
 one = dict()
-
 
 with open('db_structure.json', 'r') as file:
     db_structure = json.load(file)
 
-# Utility functions
-
-def camel_case(snake_str): # camelCase
-    components = snake_str.split("_")
-    return components[0].lower() + ''.join(x.title() for x in components[1:])
-
-def pascal_case(snake_str): # PascalCase
-    return ''.join(word.title() for word in snake_str.split("_"))
-
-# Java type mapping
-def map_sql_type_to_java(sql_type):
-    type_mapping = {
-        "INTEGER": "Integer",
-        "SMALLINT": "Short",
-        "BIGINT": "Long",
-        "REAL": "Float",
-        "FLOAT": "Double",
-        "NUMERIC": "java.math.BigDecimal",
-        "DECIMAL": "java.math.BigDecimal",
-        "CHAR": "String",
-        "VARCHAR": "String",
-        "DATE": "java.sql.Date",
-        "TIME": "java.sql.Time",
-        "TIMESTAMP": "java.sql.Timestamp",
-        "BOOLEAN": "Boolean",
-        "BINARY": "byte[]",
-        "VARBINARY": "byte[]",
-        "LONGVARBINARY": "byte[]",
-        "CLOB": "java.sql.Clob",
-        "BLOB": "java.sql.Blob"
-    }
-
-    return type_mapping.get(sql_type.upper(), "String")
-
-# Function to determine primary keys from columns and indexes
-def determine_primary_keys(details):
-    primary_keys = details.get('primary_keys', {}).get('constrained_columns', [])
-    if not primary_keys:
-        primary_keys = []
-        for index in details.get('indexes', []):
-            if index.get('unique', False):
-                primary_keys.extend(index.get('column_names', []))
-
-    return primary_keys
-
-
 # Function to generate ID class for Entity
 def generate_id_class(db_structure, output_dir, table_index, primary_keys):
     table_name = list(db_structure.keys())[table_index]
-    # details = db_structure[table_name]
     class_name = pascal_case(table_name)
 
     entity_dir = os.path.join(output_dir, 'entity')
@@ -192,21 +79,11 @@ def generate_dto_class(db_structure, output_dir, table_index, package_name):
 
         f.write("\n") # Adds Empty line
 
-        # Constructors
+        # No Args Constructor
         f.write(f"public {class_name}DTO() {{")
-        f.write("}\n\n")
-        # f.write(f"public {class_name}DTO ({class_name} {camel_case(table_name)}) {{\n")
-        # for column in details["columns"]:
-        #     column_name = column['name']
-        #     column_type = column['type']
-        #     if column_name not in many:
-        #         f.write(f"this.{camel_case(column_name)} = {camel_case(table_name)}.get{pascal_case(column_name)}();\n")
-        # for column in one.keys():
-        #     f.write(f"this.{camel_case(column)} = {camel_case(table_name)}.get{pascal_case(column)}().stream().map({pascal_case(column)}DTO::new).collect(Collectors.toList());\n")
+        f.write("}\n\n")       
 
-        # f.write("}\n\n")
-
-        # convertToDTO function
+        # convertToDTO() function
         f.write(f"public static {class_name}DTO convertToDTO({class_name} {camel_case(table_name)}) {{\n")
         f.write(f"{class_name}DTO {camel_case(table_name)}DTO = new {class_name}DTO();\n")
         for column in details['columns']:
@@ -230,15 +107,14 @@ def generate_dto_class(db_structure, output_dir, table_index, package_name):
 
             # Getter
             if column_name in many:
-                # f.write(f"public {pascal_case(many[column_name]['reference_table'])} get{pascal_case(column_name)}() {{\n")
                 continue
-            else: f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
+            else: 
+                f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
             f.write(f"      return this.{camel_case_name};\n")
             f.write("}\n\n")
 
             # Setter
             if column_name in many:
-                # f.write(f"public void set{pascal_case(column_name)}({pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)}) {{\n")
                 continue
             else: 
                 f.write(f"public void set{pascal_case(column_name)}({java_type} {camel_case_name}) {{\n")
@@ -267,9 +143,6 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
     details = db_structure[table_name]
     class_name = pascal_case(table_name)
 
-    # many = many_to_one(table_name)
-    # one = one_to_many(table_name)
-
     # Determine primary keys
     primary_keys = determine_primary_keys(details)
     print(f"Primary keys for {table_name}: {primary_keys}")
@@ -297,7 +170,6 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             generate_id_class(db_structure,output_dir,  table_index, primary_keys)
             f.write(f"@IdClass({class_name}Id.class)\n")
         
-
         f.write(f"public class {class_name} {{\n")
         for column in details['columns']:
             column_name = column['name']
@@ -316,7 +188,6 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
         for i in one.keys():
             f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['column_names'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
             f.write(f"private List<{pascal_case(i)}> {camel_case(i)};\n\n")
-
 
 
         # Generate getters and setters
@@ -387,7 +258,6 @@ def generate_repository_class(db_structure, output_dir, table_index, package_nam
 def generate_service_classes(db_structure, output_dir, table_index, package_name):
     try:
         table_name = list(db_structure.keys())[table_index]
-        # details = db_structure[table_name]
         class_name = pascal_case(table_name)
 
         # Create service directories
@@ -474,7 +344,7 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write(f"      @GetMapping\n")
             f.write(f"      public List<{class_name}DTO> findAll() {{\n")
             f.write(f"          return {camel_case(table_name)}Service.findAll();\n")
-            f.write(f"      }}\n")
+            f.write("      }\n")
             f.write("}\n")
 
         print(f"Controller class {class_name}Controller.java generated successfully.")
@@ -504,7 +374,7 @@ def copy_files_to_destination(src_dir, dest_dir):
             print(f"Error copying {filename}: {e}")
 
 
-######################## Define output directory #############################
+####################################################################### Define output directory #######################################################################
 
 current_dir = os.getcwd()
 # output_dir_in = input("Enter output directory: ")
@@ -545,4 +415,4 @@ src_dir = os.path.join(current_dir, output_dir)
 dest_dir = r""
 
 # Call the function to copy the files
-copy_files_to_destination(src_dir, dest_dir)
+# copy_files_to_destination(src_dir, dest_dir)
