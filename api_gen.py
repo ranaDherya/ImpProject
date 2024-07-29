@@ -142,6 +142,7 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
     table_name = list(db_structure.keys())[table_index]
     details = db_structure[table_name]
     class_name = pascal_case(table_name)
+    id_type = "Integer"
 
     # Determine primary keys
     primary_keys = determine_primary_keys(details)
@@ -177,6 +178,7 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
             java_type = map_sql_type_to_java(column_type)
             if column_name in primary_keys:
                 f.write("@Id\n")
+                id_type = java_type
             if column_name in many:
                 f.write("@ManyToOne\n")
                 f.write(f"@JoinColumn(name=\"{many[column_name]['column_names'][0]}\", insertable = false, updatable = false)\n")
@@ -228,10 +230,11 @@ def generate_entity_class(db_structure, output_dir, table_index, package_name, s
         f.write("}\n")
 
         print(f"Entity class {class_name}.java generated successfully.")
+        return id_type
         
 
 # Function to generate the repository interface for the first table in the schema
-def generate_repository_class(db_structure, output_dir, table_index, package_name):
+def generate_repository_class(db_structure, output_dir, table_index, package_name, id_type):
     try:
         table_name = list(db_structure.keys())[table_index]
         class_name = pascal_case(table_name)
@@ -246,7 +249,7 @@ def generate_repository_class(db_structure, output_dir, table_index, package_nam
             f.write(f"package {package_name}.repository;\n\n")
             f.write(f"import org.springframework.data.jpa.repository.JpaRepository;\n")
             f.write(f"import {package_name}.entity.{class_name};\n\n")
-            f.write(f"public interface {class_name}Repository extends JpaRepository<{class_name}, Long> {{\n")
+            f.write(f"public interface {class_name}Repository extends JpaRepository<{class_name}, {id_type}> {{\n")
             f.write("}\n")
 
         print(f"Repository interface {class_name}Repository.java created successfully.")
@@ -255,7 +258,7 @@ def generate_repository_class(db_structure, output_dir, table_index, package_nam
         print(f"Error generating repository interface: {e}")
 
 # Function to generate the service interface and implementation for the first table in the schema
-def generate_service_classes(db_structure, output_dir, table_index, package_name):
+def generate_service_classes(db_structure, output_dir, table_index, package_name, id_type):
     try:
         table_name = list(db_structure.keys())[table_index]
         class_name = pascal_case(table_name)
@@ -275,7 +278,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"import java.util.List;\n\n")
             f.write(f"public interface {class_name}Service {{\n")
             f.write(f"List<{class_name}DTO> findAll();\n")
-            f.write(f"List<{class_name}DTO> findById(Long id);\n")
+            f.write(f"List<{class_name}DTO> findById({id_type} id);\n")
             f.write("}\n")
 
         print(f"Service interface {class_name}Service.java generated successfully.")
@@ -311,7 +314,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"      }}\n")
 
             f.write(f"      @Override\n")
-            f.write(f"      public List<{class_name}DTO> findById(Long id){{\n")
+            f.write(f"      public List<{class_name}DTO> findById({id_type} id){{\n")
             f.write(f"          Optional<{class_name}> {camel_case(table_name)} = {camel_case(table_name)}Repository.findById(id);\n")
             f.write(f"          return {camel_case(table_name)}.map(f -> Collections.singletonList({class_name}DTO.convertToDTO(f))).orElse(Collections.emptyList());\n")
             f.write("      }\n\n")
@@ -325,7 +328,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
         print(f"Error generating service classes: {e}")
 
 # Function to generate the controller class for the first table in the schema
-def generate_controller_class(db_structure, output_dir, table_index, package_name):
+def generate_controller_class(db_structure, output_dir, table_index, package_name, id_type):
     try:
         table_name = list(db_structure.keys())[table_index]
         class_name = pascal_case(table_name)
@@ -358,7 +361,7 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write("      }\n")
             f.write(r'      @GetMapping("/{id}")')
             f.write("\n")
-            f.write(f"      public List<{class_name}DTO> findById(@PathVariable Long id){{\n")
+            f.write(f"      public List<{class_name}DTO> findById(@PathVariable {id_type} id){{\n")
             f.write(f"          List<{class_name}DTO> {camel_case(table_name)} = {camel_case(table_name)}Service.findById(id);\n")
             f.write(f"          return {camel_case(table_name)}.isEmpty() ? null : {camel_case(table_name)};\n")
             f.write("      }\n\n")
@@ -400,7 +403,7 @@ current_dir = os.getcwd()
 # package_name_in = input("Enter package name: ")
 # package_name = package_name_in
 output_dir = os.path.join(current_dir, "src/main/java/com/wellsfargo/demo")
-package_name = "com.wellsfargo.demo"
+package_name = "com.example.demo"
 
 for table_index in range(len(db_structure)):
 
@@ -409,7 +412,7 @@ for table_index in range(len(db_structure)):
     one = one_to_many(table_name)
 
     # Entity
-    generate_entity_class(db_structure, output_dir, table_index, package_name, "exception.dbo")
+    id_type = generate_entity_class(db_structure, output_dir, table_index, package_name, "test_dbo.dbo")
     print("Entity class generated successfully.")
 
     # DTO
@@ -417,20 +420,20 @@ for table_index in range(len(db_structure)):
     print("DTO class generated successfully.")
 
     # Repository
-    generate_repository_class(db_structure, output_dir, table_index, package_name)
+    generate_repository_class(db_structure, output_dir, table_index, package_name, id_type)
     print("Repository class generated successfully.")
 
     # Service
-    generate_service_classes(db_structure, output_dir, table_index, package_name)
+    generate_service_classes(db_structure, output_dir, table_index, package_name, id_type)
     print("Service class generated successfully.")
 
     # Controller
-    generate_controller_class(db_structure, output_dir, table_index, package_name)
+    generate_controller_class(db_structure, output_dir, table_index, package_name, id_type)
     print("Controller class generated successfully.")
 
 # Define source and destination libs
 src_dir = os.path.join(current_dir, output_dir)
-dest_dir = r"C:\Users\ranaDherya\Desktop\api-gen\src\main\java\com\wellsfargo\demo"
+dest_dir = r"C:\Users\ranaDherya\Desktop\demo\src\main\java\com\example\demo"
 
 # Call the function to copy the files
 copy_files_to_destination(src_dir, dest_dir)
