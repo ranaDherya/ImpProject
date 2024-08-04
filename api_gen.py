@@ -97,6 +97,19 @@ def generate_dto_class(db_structure, output_dir, table_index, package_name):
         f.write(f"return {camel_case(table_name)}DTO;\n")
         f.write("}\n\n")
 
+        # convertToEntity() function
+        f.write(f"public {class_name} convertToEntity() {{\n")
+        f.write(f"{class_name} {camel_case(class_name)} = new {class_name}();\n")
+        for column in details['columns']:
+            column_name = column['name']
+            if column_name in many: continue
+            f.write(f"{camel_case(class_name)}.set{pascal_case(column_name)}(this.{camel_case(column_name)});\n")
+        for column in one.keys():
+            f.write(f"{camel_case(class_name)}.set{pascal_case(column)}(this.{camel_case(column)}.stream().map({pascal_case(column)}DTO::convertToEntity).collect(Collectors.toList()));\n")
+        f.write(f"return {camel_case(class_name)};\n")
+        f.write("}\n\n")
+
+
         # Getters and Setters
         for column in details['columns']:
             column_name = column['name']
@@ -262,6 +275,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
     try:
         table_name = list(db_structure.keys())[table_index]
         class_name = pascal_case(table_name)
+        object_name = camel_case(table_name)
 
         # Create service directories
         service_dir = os.path.join(output_dir, 'service')
@@ -279,6 +293,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"public interface {class_name}Service {{\n")
             f.write(f"List<{class_name}DTO> findAll();\n")
             f.write(f"List<{class_name}DTO> findById({id_type} id);\n")
+            f.write(f"{class_name}DTO updateById({id_type} id, {class_name}DTO {object_name}DTO);\n")
             f.write("}\n")
 
         print(f"Service interface {class_name}Service.java generated successfully.")
@@ -305,20 +320,33 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"@Service\n")
             f.write(f"public class {class_name}ServiceImpl implements {class_name}Service {{\n\n")
             f.write(f"      @Autowired\n")
-            f.write(f"      private {class_name}Repository {camel_case(table_name)}Repository;\n\n")
+            f.write(f"      private {class_name}Repository {object_name}Repository;\n\n")
 
             f.write(f"      @Override\n")
             f.write(f"      public List<{class_name}DTO> findAll() {{\n")
-            f.write(f"          List<{class_name}> {camel_case(table_name)} = {camel_case(table_name)}Repository.findAll();\n")
-            f.write(f"          return {camel_case(table_name)}.stream().map({class_name}DTO::convertToDTO).collect(Collectors.toList());\n")
-            f.write(f"      }}\n")
+            f.write(f"          List<{class_name}> {object_name} = {object_name}Repository.findAll();\n")
+            f.write(f"          return {object_name}.stream().map({class_name}DTO::convertToDTO).collect(Collectors.toList());\n")
+            f.write("      }\n\n")
 
             f.write(f"      @Override\n")
             f.write(f"      public List<{class_name}DTO> findById({id_type} id){{\n")
-            f.write(f"          Optional<{class_name}> {camel_case(table_name)} = {camel_case(table_name)}Repository.findById(id);\n")
-            f.write(f"          return {camel_case(table_name)}.map(f -> Collections.singletonList({class_name}DTO.convertToDTO(f))).orElse(Collections.emptyList());\n")
+            f.write(f"          Optional<{class_name}> {object_name} = {object_name}Repository.findById(id);\n")
+            f.write(f"          return {object_name}.map(f -> Collections.singletonList({class_name}DTO.convertToDTO(f))).orElse(Collections.emptyList());\n")
             f.write("      }\n\n")
-            
+
+            f.write(f"      @Override\n")
+            f.write(f"      public {class_name}DTO updateById({id_type} id, {class_name}DTO {object_name}DTO) {{\n")
+            f.write(f"          Optional<{class_name}> optional{class_name} = {object_name}Repository.findById(id);\n")
+            f.write(f"          if (optional{class_name}.isPresent()) {{\n")
+            f.write(f"              {class_name} {object_name} = optional{class_name}.get();\n")
+            f.write(f"              {object_name} = {object_name}DTO.convertToEntity();\n")
+            f.write(f"              {object_name}.set{class_name}Id(id);\n")
+            f.write(f"              {object_name}Repository.save({object_name});\n")
+            f.write(f"              return {class_name}DTO.convertToDTO({object_name});\n")
+            f.write("          } else {\n")
+            f.write(f"              return null;\n")
+            f.write("          }\n")
+            f.write("      }\n\n")
 
             f.write("}\n")
 
@@ -332,6 +360,7 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
     try:
         table_name = list(db_structure.keys())[table_index]
         class_name = pascal_case(table_name)
+        object_name = camel_case(table_name)
 
         # Create controller directory
         controller_dir = os.path.join(output_dir, 'controller')
@@ -345,25 +374,26 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write(f"import {package_name}.dto.{class_name}DTO;\n")
             f.write(f"import {package_name}.service.{class_name}Service;\n")
             f.write(f"import org.springframework.beans.factory.annotation.Autowired;\n")
-            f.write(f"import org.springframework.web.bind.annotation.GetMapping;\n")
-            f.write(f"import org.springframework.web.bind.annotation.RequestMapping;\n")
-            f.write(f"import org.springframework.web.bind.annotation.PathVariable;\n")
-            f.write(f"import org.springframework.web.bind.annotation.RestController;\n\n")
+            f.write(f"import org.springframework.web.bind.annotation.*;\n")
             f.write(f"import java.util.List;\n\n")
             f.write(f"@RestController\n")
             f.write(f"@RequestMapping(\"{table_name}\")\n")
             f.write(f"public class {class_name}Controller {{\n\n")
             f.write(f"      @Autowired\n")
-            f.write(f"      private {class_name}Service {camel_case(table_name)}Service;\n\n")
+            f.write(f"      private {class_name}Service {object_name}Service;\n\n")
             f.write(f"      @GetMapping\n")
             f.write(f"      public List<{class_name}DTO> findAll() {{\n")
-            f.write(f"          return {camel_case(table_name)}Service.findAll();\n")
+            f.write(f"          return {object_name}Service.findAll();\n")
             f.write("      }\n")
             f.write(r'      @GetMapping("/{id}")')
             f.write("\n")
             f.write(f"      public List<{class_name}DTO> findById(@PathVariable {id_type} id){{\n")
-            f.write(f"          List<{class_name}DTO> {camel_case(table_name)} = {camel_case(table_name)}Service.findById(id);\n")
-            f.write(f"          return {camel_case(table_name)}.isEmpty() ? null : {camel_case(table_name)};\n")
+            f.write(f"          List<{class_name}DTO> {object_name} = {object_name}Service.findById(id);\n")
+            f.write(f"          return {object_name}.isEmpty() ? null : {object_name};\n")
+            f.write("      }\n\n")
+            f.write(r'      @PutMapping("/{id}")')
+            f.write(f"      public {class_name}DTO updateById(@PathVariable {id_type} id, @RequestBody {class_name}DTO {object_name}DTO) {{\n")
+            f.write(f"          return {object_name}Service.updateById(id, {object_name}DTO);\n")
             f.write("      }\n\n")
 
             f.write("}\n")
