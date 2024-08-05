@@ -1,0 +1,16 @@
+{
+    "filmId": 1,
+    "title": "Updated Title",
+    "description": "Updated Description",
+    "releaseYear": "2024",
+    "rentalDuration": 5,
+    "rentalRate": "2.99",
+    "length": 120,
+    "replacementCost": "19.99",
+    "rating": "PG-13",
+    "specialFeatures": "Trailers, Deleted Scenes",
+    "lastUpdate": "2024-08-04",
+    "filmActor": [],
+    "filmCategory": [],
+    "inventory": []
+}
