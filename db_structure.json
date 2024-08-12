@@ -83,9 +83,9 @@
       "foreign_keys": [
         {
           "name": "CITY_COUNTRY_FK",
-          "column_names": ["COUNTRY_ID"],
-          "reference_table": "COUNTRY",
-          "reference_column": ["COUNTRY_ID"]
+          "constrained_columns": ["COUNTRY_ID"],
+          "referred_table": "COUNTRY",
+          "referred_column": ["COUNTRY_ID"]
         }
       ],
       "indexes": []
@@ -168,9 +168,9 @@
       "foreign_keys": [
         {
           "name": "ADDRESS_CITY_FK",
-          "column_names": ["CITY_ID"],
-          "reference_table": "CITY",
-          "reference_column": ["CITY_ID"]
+          "constrained_columns": ["CITY_ID"],
+          "referred_table": "CITY",
+          "referred_column": ["CITY_ID"]
         }
       ],
       "indexes": []
@@ -369,15 +369,15 @@
       "foreign_keys": [
         {
           "name": "FILM_LANGUAGE_FK",
-          "column_names": ["LANGUAGE_ID"],
-          "reference_table": "LANGUAGE",
-          "reference_column": ["LANGUAGE_ID"]
+          "constrained_columns": ["LANGUAGE_ID"],
+          "referred_table": "LANGUAGE",
+          "referred_column": ["LANGUAGE_ID"]
         },
         {
           "name": "FILM_ORIGINAL_LANGUAGE_FK",
-          "column_names": ["ORIGINAL_LANGUAGE_ID"],
-          "reference_table": "LANGUAGE",
-          "reference_column": ["LANGUAGE_ID"]
+          "constrained_columns": ["ORIGINAL_LANGUAGE_ID"],
+          "referred_table": "LANGUAGE",
+          "referred_column": ["LANGUAGE_ID"]
         }
       ],
       "indexes": []
@@ -416,15 +416,15 @@
       "foreign_keys": [
         {
           "name": "FILM_ACTOR_ACTOR_FK",
-          "column_names": ["ACTOR_ID"],
-          "reference_table": "ACTOR",
-          "reference_column": ["ACTOR_ID"]
+          "constrained_columns": ["ACTOR_ID"],
+          "referred_table": "ACTOR",
+          "referred_column": ["ACTOR_ID"]
         },
         {
           "name": "FILM_ACTOR_FILM_FK",
-          "column_names": ["FILM_ID"],
-          "reference_table": "FILM",
-          "reference_column": ["FILM_ID"]
+          "constrained_columns": ["FILM_ID"],
+          "referred_table": "FILM",
+          "referred_column": ["FILM_ID"]
         }
       ],
       "indexes": []
@@ -463,15 +463,15 @@
       "foreign_keys": [
         {
           "name": "FILM_CATEGORY_FILM_FK",
-          "column_names": ["FILM_ID"],
-          "reference_table": "FILM",
-          "reference_column": ["FILM_ID"]
+          "constrained_columns": ["FILM_ID"],
+          "referred_table": "FILM",
+          "referred_column": ["FILM_ID"]
         },
         {
           "name": "FILM_CATEGORY_CATEGORY_FK",
-          "column_names": ["CATEGORY_ID"],
-          "reference_table": "CATEGORY",
-          "reference_column": ["CATEGORY_ID"]
+          "constrained_columns": ["CATEGORY_ID"],
+          "referred_table": "CATEGORY",
+          "referred_column": ["CATEGORY_ID"]
         }
       ],
       "indexes": []
@@ -568,15 +568,15 @@
       "foreign_keys": [
         {
           "name": "INVENTORY_FILM_FK",
-          "column_names": ["FILM_ID"],
-          "reference_table": "FILM",
-          "reference_column": ["FILM_ID"]
+          "constrained_columns": ["FILM_ID"],
+          "referred_table": "FILM",
+          "referred_column": ["FILM_ID"]
         },
         {
           "name": "INVENTORY_STORE_FK",
-          "column_names": ["STORE_ID"],
-          "reference_table": "STORE",
-          "reference_column": ["STORE_ID"]
+          "constrained_columns": ["STORE_ID"],
+          "referred_table": "STORE",
+          "referred_column": ["STORE_ID"]
         }
       ],
       "indexes": []
@@ -651,21 +651,21 @@
       "foreign_keys": [
         {
           "name": "RENTAL_INVENTORY_FK",
-          "column_names": ["INVENTORY_ID"],
-          "reference_table": "INVENTORY",
-          "reference_column": ["INVENTORY_ID"]
+          "constrained_columns": ["INVENTORY_ID"],
+          "referred_table": "INVENTORY",
+          "referred_column": ["INVENTORY_ID"]
         },
         {
           "name": "RENTAL_CUSTOMER_FK",
-          "column_names": ["CUSTOMER_ID"],
-          "reference_table": "CUSTOMER",
-          "reference_column": ["CUSTOMER_ID"]
+          "constrained_columns": ["CUSTOMER_ID"],
+          "referred_table": "CUSTOMER",
+          "referred_column": ["CUSTOMER_ID"]
         },
         {
           "name": "RENTAL_STAFF_FK",
-          "column_names": ["STAFF_ID"],
-          "reference_table": "STAFF",
-          "reference_column": ["STAFF_ID"]
+          "constrained_columns": ["STAFF_ID"],
+          "referred_table": "STAFF",
+          "referred_column": ["STAFF_ID"]
         }
       ],
       "indexes": []
@@ -732,21 +732,21 @@
       "foreign_keys": [
         {
           "name": "PAYMENT_CUSTOMER_FK",
-          "column_names": ["CUSTOMER_ID"],
-          "reference_table": "CUSTOMER",
-          "reference_column": ["CUSTOMER_ID"]
+          "constrained_columns": ["CUSTOMER_ID"],
+          "referred_table": "CUSTOMER",
+          "referred_column": ["CUSTOMER_ID"]
         },
         {
           "name": "PAYMENT_STAFF_FK",
-          "column_names": ["STAFF_ID"],
-          "reference_table": "STAFF",
-          "reference_column": ["STAFF_ID"]
+          "constrained_columns": ["STAFF_ID"],
+          "referred_table": "STAFF",
+          "referred_column": ["STAFF_ID"]
         },
         {
           "name": "PAYMENT_RENTAL_FK",
-          "column_names": ["RENTAL_ID"],
-          "reference_table": "RENTAL",
-          "reference_column": ["RENTAL_ID"]
+          "constrained_columns": ["RENTAL_ID"],
+          "referred_table": "RENTAL",
+          "referred_column": ["RENTAL_ID"]
         }
       ],
       "indexes": []
@@ -837,15 +837,15 @@
       "foreign_keys": [
         {
           "name": "CUSTOMER_STORE_FK",
-          "column_names": ["STORE_ID"],
-          "reference_table": "STORE",
-          "reference_column": ["STORE_ID"]
+          "constrained_columns": ["STORE_ID"],
+          "referred_table": "STORE",
+          "referred_column": ["STORE_ID"]
         },
         {
           "name": "CUSTOMER_ADDRESS_FK",
-          "column_names": ["ADDRESS_ID"],
-          "reference_table": "ADDRESS",
-          "reference_column": ["ADDRESS_ID"]
+          "constrained_columns": ["ADDRESS_ID"],
+          "referred_table": "ADDRESS",
+          "referred_column": ["ADDRESS_ID"]
         }
       ],
       "indexes": []
@@ -944,15 +944,15 @@
       "foreign_keys": [
         {
           "name": "STAFF_ADDRESS_FK",
-          "column_names": ["ADDRESS_ID"],
-          "reference_table": "ADDRESS",
-          "reference_column": ["ADDRESS_ID"]
+          "constrained_columns": ["ADDRESS_ID"],
+          "referred_table": "ADDRESS",
+          "referred_column": ["ADDRESS_ID"]
         },
         {
           "name": "STAFF_STORE_FK",
-          "column_names": ["STORE_ID"],
-          "reference_table": "STORE",
-          "reference_column": ["STORE_ID"]
+          "constrained_columns": ["STORE_ID"],
+          "referred_table": "STORE",
+          "referred_column": ["STORE_ID"]
         }
       ],
       "indexes": []
@@ -1003,9 +1003,9 @@
       "foreign_keys": [
         {
           "name": "STORE_ADDRESS_FK",
-          "column_names": ["ADDRESS_ID"],
-          "reference_table": "ADDRESS",
-          "reference_column": ["ADDRESS_ID"]
+          "constrained_columns": ["ADDRESS_ID"],
+          "referred_table": "ADDRESS",
+          "referred_column": ["ADDRESS_ID"]
         }
       ],
       "indexes": []

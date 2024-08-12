@@ -272,18 +272,18 @@ def generate_entity_class(db_structure, output_dir, package_name, schema, many, 
             if column_name in primary_keys and len(primary_keys) == 1:
                 f.write("@Id\n")
                 if column_name in many:
-                    id_type = pascal_case(many[column_name]['reference_table'])
+                    id_type = pascal_case(many[column_name]['referred_table'])
                 else: id_type = java_type
             if column_name in many:
                 if (len(primary_keys)>1 and column_name not in primary_keys) or len(primary_keys)==1:
                     f.write("@ManyToOne\n")
-                    f.write(f"@JoinColumn(name=\"{many[column_name]['column_names'][0]}\", nullable = true)\n")
-                    f.write(f"private {pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)};\n\n")
+                    f.write(f"@JoinColumn(name=\"{many[column_name]['constrained_columns'][0]}\", nullable = true)\n")
+                    f.write(f"private {pascal_case(many[column_name]['referred_table'])} {camel_case(column_name)};\n\n")
                 if len(primary_keys)>1 and column_name in primary_keys:
                     f.write(f"@ManyToOne\n")
                     f.write(f'@MapsId("{camel_case(column_name)}")\n')
-                    f.write(f'@JoinColumn(name = "{many[column_name]["column_names"][0]}", nullable = true)\n')
-                    f.write(f"private {pascal_case(many[column_name]['reference_table'])} {camel_case(many[column_name]['reference_table'])}Id;\n\n")
+                    f.write(f'@JoinColumn(name = "{many[column_name]["constrained_columns"][0]}", nullable = true)\n')
+                    f.write(f"private {pascal_case(many[column_name]['referred_table'])} {camel_case(many[column_name]['referred_table'])}Id;\n\n")
             else: 
                 f.write(f"@Column(name=\"{column_name}\")\n")
                 f.write(f"private {java_type} {camel_case(column_name)};\n\n")
@@ -292,13 +292,13 @@ def generate_entity_class(db_structure, output_dir, package_name, schema, many, 
         for i in one.keys():
             is_pk_of_other_entity = False
             for j in db_structure[i]["primary_keys"]["constrained_columns"]:
-                if one[i]['column_names'][0] == j:
+                if one[i]['constrained_columns'][0] == j:
                     is_pk_of_other_entity = True
                     break
             if is_pk_of_other_entity:
-                f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['column_names'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
+                f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['constrained_columns'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
             else:
-                f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['column_names'][0])}\", cascade = {{CascadeType.PERSIST, CascadeType.MERGE}}, fetch = FetchType.LAZY)\n")
+                f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['constrained_columns'][0])}\", cascade = {{CascadeType.PERSIST, CascadeType.MERGE}}, fetch = FetchType.LAZY)\n")
             f.write(f"private List<{pascal_case(i)}> {camel_case(i)};\n\n")
 
 
@@ -325,7 +325,7 @@ def generate_entity_class(db_structure, output_dir, package_name, schema, many, 
                     f.write("}\n\n")
             else:        
                 if column_name in many:
-                    f.write(f"public {pascal_case(many[column_name]['reference_table'])} get{pascal_case(column_name)}() {{\n")
+                    f.write(f"public {pascal_case(many[column_name]['referred_table'])} get{pascal_case(column_name)}() {{\n")
                 else: f.write(f"public {java_type} get{pascal_case(column_name)}() {{\n")
                 f.write(f"      return this.{camel_case_name};\n")
                 f.write("}\n\n")
@@ -343,7 +343,7 @@ def generate_entity_class(db_structure, output_dir, package_name, schema, many, 
                     f.write("}\n\n")
             else:
                 if column_name in many:
-                    f.write(f"public void set{pascal_case(column_name)}({pascal_case(many[column_name]['reference_table'])} {camel_case(column_name)}) {{\n")
+                    f.write(f"public void set{pascal_case(column_name)}({pascal_case(many[column_name]['referred_table'])} {camel_case(column_name)}) {{\n")
                 else: 
                     f.write(f"public void set{pascal_case(column_name)}({java_type} {camel_case_name}) {{\n")
                 f.write(f"      this.{camel_case_name} = {camel_case_name};\n")
@@ -434,7 +434,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
         for i in one.keys():
                 is_pk_of_other_entity = False
                 for j in db_structure[i]["primary_keys"]["constrained_columns"]:
-                    if one[i]['column_names'][0] == j:
+                    if one[i]['constrained_columns'][0] == j:
                         is_pk_of_other_entity = True
                         break
                 if is_pk_of_other_entity == False:

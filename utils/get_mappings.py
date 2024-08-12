@@ -9,7 +9,7 @@ def one_to_many(table_name, db_structure):
     for tbl in db_structure.keys():
         if table_name == tbl: continue
         for fk in db_structure[tbl]["foreign_keys"]:
-            if fk["reference_table"] == table_name:
+            if fk["referred_table"] == table_name:
                 mapping[tbl] = fk
                 break
 
@@ -23,7 +23,7 @@ def many_to_one(table_name, db_structure):
     mapping = dict()
     foreign_keys = db_structure[table_name]["foreign_keys"]
     for fk in foreign_keys:
-        mapping[fk["column_names"][0]] = fk
+        mapping[fk["constrained_columns"][0]] = fk
 
     return mapping
 
