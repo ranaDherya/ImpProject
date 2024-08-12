@@ -1,0 +1,62 @@
+{
+    "COUNTRY": [
+        "http://localhost:8080/COUNTRY",
+        "http://localhost:8080/COUNTRY/id"
+    ],
+    "CITY": [
+        "http://localhost:8080/CITY",
+        "http://localhost:8080/CITY/id"
+    ],
+    "ADDRESS": [
+        "http://localhost:8080/ADDRESS",
+        "http://localhost:8080/ADDRESS/id"
+    ],
+    "LANGUAGE": [
+        "http://localhost:8080/LANGUAGE",
+        "http://localhost:8080/LANGUAGE/id"
+    ],
+    "CATEGORY": [
+        "http://localhost:8080/CATEGORY",
+        "http://localhost:8080/CATEGORY/id"
+    ],
+    "FILM": [
+        "http://localhost:8080/FILM",
+        "http://localhost:8080/FILM/id"
+    ],
+    "FILM_ACTOR": [
+        "http://localhost:8080/FILM_ACTOR",
+        "http://localhost:8080/FILM_ACTOR/id"
+    ],
+    "FILM_CATEGORY": [
+        "http://localhost:8080/FILM_CATEGORY",
+        "http://localhost:8080/FILM_CATEGORY/id"
+    ],
+    "ACTOR": [
+        "http://localhost:8080/ACTOR",
+        "http://localhost:8080/ACTOR/id"
+    ],
+    "INVENTORY": [
+        "http://localhost:8080/INVENTORY",
+        "http://localhost:8080/INVENTORY/id"
+    ],
+    "RENTAL": [
+        "http://localhost:8080/RENTAL",
+        "http://localhost:8080/RENTAL/id"
+    ],
+    "PAYMENT": [
+        "http://localhost:8080/PAYMENT",
+        "http://localhost:8080/PAYMENT/id"
+    ],
+    "CUSTOMER": [
+        "http://localhost:8080/CUSTOMER",
+        "http://localhost:8080/CUSTOMER/id"
+    ],
+    "STAFF": [
+        "http://localhost:8080/STAFF",
+        "http://localhost:8080/STAFF/id"
+    ],
+    "STORE": [
+        "http://localhost:8080/STORE",
+        "http://localhost:8080/STORE/id"
+    ]
+}

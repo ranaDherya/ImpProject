@@ -522,40 +522,6 @@
       "foreign_keys": [],
       "indexes": []
     },
-    "FILM_TEXT": {
-      "columns": [
-        {
-          "name": "FILM_ID",
-          "type": "INTEGER",
-          "nullable": false,
-          "default": null,
-          "autoincrement": false,
-          "comment": "Primary key"
-        },
-        {
-          "name": "TITLE",
-          "type": "VARCHAR(255)",
-          "nullable": false,
-          "default": null,
-          "autoincrement": false,
-          "comment": null
-        },
-        {
-          "name": "DESCRIPTION",
-          "type": "TEXT",
-          "nullable": true,
-          "default": null,
-          "autoincrement": false,
-          "comment": null
-        }
-      ],
-      "primary_keys": {
-        "name": "FILM_TEXT_PK",
-        "constrained_columns": ["FILM_ID"]
-      },
-      "foreign_keys": [],
-      "indexes": []
-    },
     "INVENTORY": {
       "columns": [
         {
@@ -1035,12 +1001,6 @@
         "constrained_columns": ["STORE_ID"]
       },
       "foreign_keys": [
-        {
-          "name": "STORE_MANAGER_FK",
-          "column_names": ["MANAGER_STAFF_ID"],
-          "reference_table": "STAFF",
-          "reference_column": ["STAFF_ID"]
-        },
         {
           "name": "STORE_ADDRESS_FK",
           "column_names": ["ADDRESS_ID"],
