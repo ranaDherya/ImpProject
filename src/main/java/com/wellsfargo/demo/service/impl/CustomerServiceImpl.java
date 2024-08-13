@@ -5,8 +5,6 @@ import com.example.demo.entity.Customer;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.CustomerService;
 
-import com.example.demo.repository.RentalRepository;
-import com.example.demo.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +19,6 @@ public class CustomerServiceImpl implements CustomerService {
 
       @Autowired
       private CustomerRepository customerRepository;
-
-      @Autowired
-      private RentalRepository rentalRepository;
-
-      @Autowired
-      private PaymentRepository paymentRepository;
 
       @Override
       public List<CustomerDTO> findAll() {
@@ -59,15 +51,6 @@ public class CustomerServiceImpl implements CustomerService {
       public void deleteById(Integer id) {
           Optional<Customer> optionalCustomer = customerRepository.findById(id);
           if (optionalCustomer.isPresent()){
-              Customer customer = optionalCustomer.get();
-              customer.getRental().forEach(rental -> {
-                  rental.setCustomerId(null);
-                  rentalRepository.save(rental);
-              });
-              customer.getPayment().forEach(payment -> {
-                  payment.setCustomerId(null);
-                  paymentRepository.save(payment);
-              });
               customerRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

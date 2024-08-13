@@ -289,16 +289,8 @@ def generate_entity_class(db_structure, output_dir, package_name, schema, many, 
                 f.write(f"private {java_type} {camel_case(column_name)};\n\n")
 
         # One to Many Mapping
-        for i in one.keys():
-            is_pk_of_other_entity = False
-            for j in db_structure[i]["primary_keys"]["constrained_columns"]:
-                if one[i]['constrained_columns'][0] == j:
-                    is_pk_of_other_entity = True
-                    break
-            if is_pk_of_other_entity:
-                f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['constrained_columns'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
-            else:
-                f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['constrained_columns'][0])}\", cascade = {{CascadeType.PERSIST, CascadeType.MERGE}}, fetch = FetchType.LAZY)\n")
+        for i in one.keys():    
+            f.write(f"@OneToMany(mappedBy = \"{camel_case(one[i]['constrained_columns'][0])}\", cascade = CascadeType.ALL, fetch = FetchType.LAZY)\n")
             f.write(f"private List<{pascal_case(i)}> {camel_case(i)};\n\n")
 
 
@@ -352,7 +344,7 @@ def generate_entity_class(db_structure, output_dir, package_name, schema, many, 
 
         # Getter setter for one_to_many
         for column in one.keys():
-            # Getter\
+            # Getter
             f.write(f"public List<{pascal_case(column)}> get{pascal_case(column)}() {{\n")
             f.write(f"      return this.{camel_case(column)};\n")
             f.write("}\n\n")
@@ -430,15 +422,6 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
 
         # Generate Service Implementation
         service_impl_path = os.path.join(service_impl_dir, f"{class_name}ServiceImpl.java")
-        non_pk_of_other_entity = []
-        for i in one.keys():
-                is_pk_of_other_entity = False
-                for j in db_structure[i]["primary_keys"]["constrained_columns"]:
-                    if one[i]['constrained_columns'][0] == j:
-                        is_pk_of_other_entity = True
-                        break
-                if is_pk_of_other_entity == False:
-                    non_pk_of_other_entity.append(i)
 
         with open(service_impl_path, 'w') as f:
             f.write(f"package {package_name}.service.impl;\n\n")
@@ -447,8 +430,6 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"import {package_name}.entity.{class_name};\n")
             f.write(f"import {package_name}.repository.{class_name}Repository;\n")
             f.write(f"import {package_name}.service.{class_name}Service;\n\n")
-            for i in non_pk_of_other_entity:
-                f.write(f"import {package_name}.repository.{pascal_case(i)}Repository;\n")
 
             f.write("import org.springframework.beans.factory.annotation.Autowired;\n")
             f.write("import org.springframework.stereotype.Service;\n")
@@ -465,10 +446,6 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"public class {class_name}ServiceImpl implements {class_name}Service {{\n\n")
             f.write(f"      @Autowired\n")
             f.write(f"      private {class_name}Repository {object_name}Repository;\n\n")
-
-            for i in non_pk_of_other_entity:
-                f.write(f"      @Autowired\n")
-                f.write(f"      private {pascal_case(i)}Repository {camel_case(i)}Repository;\n\n")
 
             f.write(f"      @Override\n")
             f.write(f"      public List<{class_name}DTO> findAll() {{\n")
@@ -502,13 +479,6 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"      public void deleteById({id_type} id) {{\n")
             f.write(f"          Optional<{class_name}> optional{class_name} = {object_name}Repository.findById(id);\n")
             f.write(f"          if (optional{class_name}.isPresent()){{\n")
-            if len(one) != 0:
-                f.write(f"              {class_name} {object_name} = optional{class_name}.get();\n")
-            for i in non_pk_of_other_entity:
-                f.write(f"              {object_name}.get{pascal_case(i)}().forEach({camel_case(i)} -> {{\n")
-                f.write(f"                  {camel_case(i)}.set{class_name}Id(null);\n")
-                f.write(f"                  {camel_case(i)}Repository.save({camel_case(i)});\n")
-                f.write("              });\n")
             f.write(f"              {object_name}Repository.deleteById(id);\n")
             f.write("           } else { \n")
             f.write('               throw new RuntimeException("Film not found");\n')
@@ -629,7 +599,6 @@ for table_index in range(len(db_structure)):
     one = one_to_many(table_name, db_structure)
     details = db_structure[table_name]
     primary_keys = determine_primary_keys(details)
-    # print(primary_keys)
 
     # Entity
     id_type = generate_entity_class(db_structure, output_dir, package_name, "test_dbo.dbo", many, one,table_name, details, primary_keys)

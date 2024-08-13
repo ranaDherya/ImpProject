@@ -51,7 +51,6 @@ public class ActorServiceImpl implements ActorService {
       public void deleteById(Integer id) {
           Optional<Actor> optionalActor = actorRepository.findById(id);
           if (optionalActor.isPresent()){
-              Actor actor = optionalActor.get();
               actorRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

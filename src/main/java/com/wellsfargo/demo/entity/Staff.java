@@ -41,10 +41,10 @@ private String password;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "staffId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "staffId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Rental> rental;
 
-@OneToMany(mappedBy = "staffId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "staffId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Payment> payment;
 
 public Integer getStaffId() {

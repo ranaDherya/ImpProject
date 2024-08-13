@@ -5,8 +5,6 @@ import com.example.demo.entity.Staff;
 import com.example.demo.repository.StaffRepository;
 import com.example.demo.service.StaffService;
 
-import com.example.demo.repository.RentalRepository;
-import com.example.demo.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +19,6 @@ public class StaffServiceImpl implements StaffService {
 
       @Autowired
       private StaffRepository staffRepository;
-
-      @Autowired
-      private RentalRepository rentalRepository;
-
-      @Autowired
-      private PaymentRepository paymentRepository;
 
       @Override
       public List<StaffDTO> findAll() {
@@ -59,15 +51,6 @@ public class StaffServiceImpl implements StaffService {
       public void deleteById(Integer id) {
           Optional<Staff> optionalStaff = staffRepository.findById(id);
           if (optionalStaff.isPresent()){
-              Staff staff = optionalStaff.get();
-              staff.getRental().forEach(rental -> {
-                  rental.setStaffId(null);
-                  rentalRepository.save(rental);
-              });
-              staff.getPayment().forEach(payment -> {
-                  payment.setStaffId(null);
-                  paymentRepository.save(payment);
-              });
               staffRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

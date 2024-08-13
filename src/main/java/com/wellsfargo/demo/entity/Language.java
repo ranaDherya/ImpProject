@@ -17,7 +17,7 @@ private String name;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "languageId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "languageId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Film> film;
 
 public Integer getLanguageId() {

@@ -57,7 +57,7 @@ private List<FilmActor> filmActor;
 @OneToMany(mappedBy = "filmId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<FilmCategory> filmCategory;
 
-@OneToMany(mappedBy = "filmId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "filmId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Inventory> inventory;
 
 public Integer getFilmId() {

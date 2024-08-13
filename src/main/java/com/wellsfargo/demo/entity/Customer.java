@@ -38,10 +38,10 @@ private String createDate;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "customerId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "customerId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Rental> rental;
 
-@OneToMany(mappedBy = "customerId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "customerId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Payment> payment;
 
 public Integer getCustomerId() {

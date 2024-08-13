@@ -5,7 +5,6 @@ import com.example.demo.entity.City;
 import com.example.demo.repository.CityRepository;
 import com.example.demo.service.CityService;
 
-import com.example.demo.repository.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,6 @@ public class CityServiceImpl implements CityService {
 
       @Autowired
       private CityRepository cityRepository;
-
-      @Autowired
-      private AddressRepository addressRepository;
 
       @Override
       public List<CityDTO> findAll() {
@@ -55,11 +51,6 @@ public class CityServiceImpl implements CityService {
       public void deleteById(Integer id) {
           Optional<City> optionalCity = cityRepository.findById(id);
           if (optionalCity.isPresent()){
-              City city = optionalCity.get();
-              city.getAddress().forEach(address -> {
-                  address.setCityId(null);
-                  addressRepository.save(address);
-              });
               cityRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

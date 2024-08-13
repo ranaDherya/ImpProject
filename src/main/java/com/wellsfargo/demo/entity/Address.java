@@ -35,13 +35,13 @@ private String phone;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "addressId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "addressId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Customer> customer;
 
-@OneToMany(mappedBy = "addressId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "addressId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Staff> staff;
 
-@OneToMany(mappedBy = "addressId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "addressId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Store> store;
 
 public Integer getAddressId() {

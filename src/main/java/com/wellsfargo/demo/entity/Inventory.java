@@ -22,7 +22,7 @@ private Store storeId;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "inventoryId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "inventoryId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Rental> rental;
 
 public Integer getInventoryId() {

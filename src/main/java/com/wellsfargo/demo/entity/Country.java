@@ -17,7 +17,7 @@ private String country;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "countryId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "countryId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<City> city;
 
 public Integer getCountryId() {

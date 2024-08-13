@@ -5,7 +5,6 @@ import com.example.demo.entity.Country;
 import com.example.demo.repository.CountryRepository;
 import com.example.demo.service.CountryService;
 
-import com.example.demo.repository.CityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,6 @@ public class CountryServiceImpl implements CountryService {
 
       @Autowired
       private CountryRepository countryRepository;
-
-      @Autowired
-      private CityRepository cityRepository;
 
       @Override
       public List<CountryDTO> findAll() {
@@ -55,11 +51,6 @@ public class CountryServiceImpl implements CountryService {
       public void deleteById(Integer id) {
           Optional<Country> optionalCountry = countryRepository.findById(id);
           if (optionalCountry.isPresent()){
-              Country country = optionalCountry.get();
-              country.getCity().forEach(city -> {
-                  city.setCountryId(null);
-                  cityRepository.save(city);
-              });
               countryRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

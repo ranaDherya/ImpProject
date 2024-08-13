@@ -32,7 +32,7 @@ private Staff staffId;
 @Column(name="LAST_UPDATE")
 private String lastUpdate;
 
-@OneToMany(mappedBy = "rentalId", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@OneToMany(mappedBy = "rentalId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private List<Payment> payment;
 
 public Integer getRentalId() {

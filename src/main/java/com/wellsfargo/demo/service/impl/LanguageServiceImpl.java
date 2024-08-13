@@ -5,7 +5,6 @@ import com.example.demo.entity.Language;
 import com.example.demo.repository.LanguageRepository;
 import com.example.demo.service.LanguageService;
 
-import com.example.demo.repository.FilmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,6 @@ public class LanguageServiceImpl implements LanguageService {
 
       @Autowired
       private LanguageRepository languageRepository;
-
-      @Autowired
-      private FilmRepository filmRepository;
 
       @Override
       public List<LanguageDTO> findAll() {
@@ -55,11 +51,6 @@ public class LanguageServiceImpl implements LanguageService {
       public void deleteById(Integer id) {
           Optional<Language> optionalLanguage = languageRepository.findById(id);
           if (optionalLanguage.isPresent()){
-              Language language = optionalLanguage.get();
-              language.getFilm().forEach(film -> {
-                  film.setLanguageId(null);
-                  filmRepository.save(film);
-              });
               languageRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

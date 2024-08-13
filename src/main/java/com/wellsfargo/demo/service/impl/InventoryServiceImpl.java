@@ -5,7 +5,6 @@ import com.example.demo.entity.Inventory;
 import com.example.demo.repository.InventoryRepository;
 import com.example.demo.service.InventoryService;
 
-import com.example.demo.repository.RentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,6 @@ public class InventoryServiceImpl implements InventoryService {
 
       @Autowired
       private InventoryRepository inventoryRepository;
-
-      @Autowired
-      private RentalRepository rentalRepository;
 
       @Override
       public List<InventoryDTO> findAll() {
@@ -55,11 +51,6 @@ public class InventoryServiceImpl implements InventoryService {
       public void deleteById(Integer id) {
           Optional<Inventory> optionalInventory = inventoryRepository.findById(id);
           if (optionalInventory.isPresent()){
-              Inventory inventory = optionalInventory.get();
-              inventory.getRental().forEach(rental -> {
-                  rental.setInventoryId(null);
-                  rentalRepository.save(rental);
-              });
               inventoryRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");

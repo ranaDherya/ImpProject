@@ -51,7 +51,6 @@ public class CategoryServiceImpl implements CategoryService {
       public void deleteById(Integer id) {
           Optional<Category> optionalCategory = categoryRepository.findById(id);
           if (optionalCategory.isPresent()){
-              Category category = optionalCategory.get();
               categoryRepository.deleteById(id);
            } else { 
                throw new RuntimeException("Film not found");
