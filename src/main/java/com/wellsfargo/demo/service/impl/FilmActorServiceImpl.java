@@ -59,4 +59,11 @@ public class FilmActorServiceImpl implements FilmActorService {
            }
        }
 
+      @Override
+      public FilmActorDTO insertFilmActor (FilmActorDTO filmActorDTO) {
+          FilmActor filmActor = filmActorDTO.convertToEntity();
+          FilmActor savedFilmActor = filmActorRepository.save(filmActor);
+          return FilmActorDTO.convertToDTO(savedFilmActor);
+      }
+
 }

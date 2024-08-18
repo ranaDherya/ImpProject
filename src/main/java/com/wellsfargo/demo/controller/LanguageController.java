@@ -33,4 +33,8 @@ public class LanguageController {
           languageService.deleteById(id);
       }
 
+      @PostMapping
+      public LanguageDTO insertLanguage (@RequestBody LanguageDTO languageDTO) {
+          return languageService.insertLanguage(languageDTO);
+       }
 }

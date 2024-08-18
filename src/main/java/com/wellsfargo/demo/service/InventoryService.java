@@ -9,4 +9,5 @@ List<InventoryDTO> findAll();
 List<InventoryDTO> findById(Integer id);
 InventoryDTO updateById(Integer id, InventoryDTO inventoryDTO);
 void deleteById(Integer id);
+InventoryDTO insertInventory(InventoryDTO inventoryDTO);
 }

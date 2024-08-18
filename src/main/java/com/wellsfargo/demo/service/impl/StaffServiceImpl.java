@@ -57,4 +57,11 @@ public class StaffServiceImpl implements StaffService {
            }
        }
 
+      @Override
+      public StaffDTO insertStaff (StaffDTO staffDTO) {
+          Staff staff = staffDTO.convertToEntity();
+          Staff savedStaff = staffRepository.save(staff);
+          return StaffDTO.convertToDTO(savedStaff);
+      }
+
 }

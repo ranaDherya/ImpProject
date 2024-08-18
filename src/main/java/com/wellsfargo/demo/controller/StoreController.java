@@ -33,4 +33,8 @@ public class StoreController {
           storeService.deleteById(id);
       }
 
+      @PostMapping
+      public StoreDTO insertStore (@RequestBody StoreDTO storeDTO) {
+          return storeService.insertStore(storeDTO);
+       }
 }

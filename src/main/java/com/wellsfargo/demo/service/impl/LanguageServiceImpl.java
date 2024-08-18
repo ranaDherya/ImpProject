@@ -57,4 +57,11 @@ public class LanguageServiceImpl implements LanguageService {
            }
        }
 
+      @Override
+      public LanguageDTO insertLanguage (LanguageDTO languageDTO) {
+          Language language = languageDTO.convertToEntity();
+          Language savedLanguage = languageRepository.save(language);
+          return LanguageDTO.convertToDTO(savedLanguage);
+      }
+
 }

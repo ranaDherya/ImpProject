@@ -57,4 +57,11 @@ public class FilmServiceImpl implements FilmService {
            }
        }
 
+      @Override
+      public FilmDTO insertFilm (FilmDTO filmDTO) {
+          Film film = filmDTO.convertToEntity();
+          Film savedFilm = filmRepository.save(film);
+          return FilmDTO.convertToDTO(savedFilm);
+      }
+
 }

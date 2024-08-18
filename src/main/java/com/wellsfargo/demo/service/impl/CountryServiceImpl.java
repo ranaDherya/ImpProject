@@ -57,4 +57,11 @@ public class CountryServiceImpl implements CountryService {
            }
        }
 
+      @Override
+      public CountryDTO insertCountry (CountryDTO countryDTO) {
+          Country country = countryDTO.convertToEntity();
+          Country savedCountry = countryRepository.save(country);
+          return CountryDTO.convertToDTO(savedCountry);
+      }
+
 }

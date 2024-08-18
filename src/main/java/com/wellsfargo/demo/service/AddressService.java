@@ -9,4 +9,5 @@ List<AddressDTO> findAll();
 List<AddressDTO> findById(Integer id);
 AddressDTO updateById(Integer id, AddressDTO addressDTO);
 void deleteById(Integer id);
+AddressDTO insertAddress(AddressDTO addressDTO);
 }

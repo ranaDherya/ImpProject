@@ -57,4 +57,11 @@ public class CategoryServiceImpl implements CategoryService {
            }
        }
 
+      @Override
+      public CategoryDTO insertCategory (CategoryDTO categoryDTO) {
+          Category category = categoryDTO.convertToEntity();
+          Category savedCategory = categoryRepository.save(category);
+          return CategoryDTO.convertToDTO(savedCategory);
+      }
+
 }

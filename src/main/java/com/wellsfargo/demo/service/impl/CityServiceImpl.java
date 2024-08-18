@@ -57,4 +57,11 @@ public class CityServiceImpl implements CityService {
            }
        }
 
+      @Override
+      public CityDTO insertCity (CityDTO cityDTO) {
+          City city = cityDTO.convertToEntity();
+          City savedCity = cityRepository.save(city);
+          return CityDTO.convertToDTO(savedCity);
+      }
+
 }

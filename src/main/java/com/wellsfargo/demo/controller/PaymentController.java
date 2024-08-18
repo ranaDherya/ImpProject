@@ -33,4 +33,8 @@ public class PaymentController {
           paymentService.deleteById(id);
       }
 
+      @PostMapping
+      public PaymentDTO insertPayment (@RequestBody PaymentDTO paymentDTO) {
+          return paymentService.insertPayment(paymentDTO);
+       }
 }

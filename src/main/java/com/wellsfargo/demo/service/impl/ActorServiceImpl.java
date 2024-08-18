@@ -57,4 +57,11 @@ public class ActorServiceImpl implements ActorService {
            }
        }
 
+      @Override
+      public ActorDTO insertActor (ActorDTO actorDTO) {
+          Actor actor = actorDTO.convertToEntity();
+          Actor savedActor = actorRepository.save(actor);
+          return ActorDTO.convertToDTO(savedActor);
+      }
+
 }

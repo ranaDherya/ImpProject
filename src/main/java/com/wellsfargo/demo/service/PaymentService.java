@@ -9,4 +9,5 @@ List<PaymentDTO> findAll();
 List<PaymentDTO> findById(Integer id);
 PaymentDTO updateById(Integer id, PaymentDTO paymentDTO);
 void deleteById(Integer id);
+PaymentDTO insertPayment(PaymentDTO paymentDTO);
 }

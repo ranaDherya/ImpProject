@@ -9,4 +9,5 @@ List<CustomerDTO> findAll();
 List<CustomerDTO> findById(Integer id);
 CustomerDTO updateById(Integer id, CustomerDTO customerDTO);
 void deleteById(Integer id);
+CustomerDTO insertCustomer(CustomerDTO customerDTO);
 }

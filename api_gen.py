@@ -416,6 +416,7 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write(f"List<{class_name}DTO> findById({id_type} id);\n")
             f.write(f"{class_name}DTO updateById({id_type} id, {class_name}DTO {object_name}DTO);\n")
             f.write(f"void deleteById({id_type} id);\n")
+            f.write(f"{class_name}DTO insert{class_name}({class_name}DTO {object_name}DTO);\n")
             f.write("}\n")
 
         print(f"Service interface {class_name}Service.java generated successfully.")
@@ -485,7 +486,12 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
             f.write('           }\n')
             f.write('       }\n\n')
                 
-
+            f.write(f"      @Override\n")
+            f.write(f"      public {class_name}DTO insert{class_name} ({class_name}DTO {object_name}DTO) {{\n")
+            f.write(f"          {class_name} {object_name} = {object_name}DTO.convertToEntity();\n")
+            f.write(f"          {class_name} saved{class_name} = {object_name}Repository.save({object_name});\n")
+            f.write(f"          return {class_name}DTO.convertToDTO(saved{class_name});\n")
+            f.write("      }\n\n")
 
             f.write("}\n")
 
@@ -495,13 +501,12 @@ def generate_service_classes(db_structure, output_dir, table_index, package_name
         print(f"Error generating service classes: {e}")
 
 # Function to generate the controller class for the first table in the schema
-def generate_controller_class(db_structure, output_dir, table_index, package_name, id_type, api_logs):
+def generate_controller_class(db_structure, output_dir, table_index, package_name, id_type, api_logs, primary_keys):
     try:
         table_name = list(db_structure.keys())[table_index]
-        details = db_structure[table_name]
-        primary_keys = determine_primary_keys(details)
         class_name = pascal_case(table_name)
         object_name = camel_case(table_name)
+        num_of_primary_keys = len(primary_keys)
 
         # Create controller directory
         controller_dir = os.path.join(output_dir, 'controller')
@@ -526,30 +531,76 @@ def generate_controller_class(db_structure, output_dir, table_index, package_nam
             f.write(f"      @Autowired\n")
             f.write(f"      private {class_name}Service {object_name}Service;\n\n")
             
+
+            ### FindAll
             f.write(r"      @GetMapping")
             f.write("\n")
             f.write(f"      public List<{class_name}DTO> findAll() {{\n")
             f.write(f"          return {object_name}Service.findAll();\n")
             f.write("      }\n")
 
-            f.write(r'      @GetMapping("/{id}")')
-            f.write("\n")
-            f.write(f"      public List<{class_name}DTO> findById(@PathVariable {id_type} id){{\n")
+            mappingStr = ''
+            argsStr = ''
+            list_of_primary_keys = ""
+            if num_of_primary_keys>1:
+                
+                for pk in primary_keys:
+                    mappingStr += '/{' + f'{camel_case(pk)}' + '}'
+                    list_of_primary_keys += camel_case(pk) + ", "
+                    id_of_pk = "Long"
+                    for col in details["columns"]:
+                        if col["name"] == pk:
+                            id_of_pk = col["type"]
+                            id_of_pk = map_sql_type_to_java(id_of_pk)
+                            break
+                    argsStr += f'@PathVariable {id_of_pk} {camel_case(pk)}, '
+                
+
+            ### FindById
+            if num_of_primary_keys > 1:
+                f.write(f'      @GetMapping("{mappingStr}")\n')
+                f.write(f"      public List<{class_name}DTO> findById({argsStr[:-2]}){{\n")
+                f.write(f"          {id_type} id = new {id_type}({list_of_primary_keys[:-2]});\n")
+            if num_of_primary_keys == 1:
+                f.write(r'      @GetMapping("/{id}")')
+                f.write("\n")
+                f.write(f"      public List<{class_name}DTO> findById(@PathVariable {id_type} id){{\n")
+
             f.write(f"          List<{class_name}DTO> {object_name} = {object_name}Service.findById(id);\n")
             f.write(f"          return {object_name}.isEmpty() ? null : {object_name};\n")
             f.write("      }\n\n")
 
-            f.write(r'      @PutMapping("/{id}")')
-            f.write("\n")
-            f.write(f"      public {class_name}DTO updateById(@PathVariable {id_type} id, @RequestBody {class_name}DTO {object_name}DTO) {{\n")
+
+            # UpdateById
+            if num_of_primary_keys > 1:
+                f.write(f'      @PutMapping("{mappingStr}")\n')
+                f.write(f"      public {class_name}DTO updateById({argsStr} @RequestBody {class_name}DTO {object_name}DTO) {{\n")
+                f.write(f"          {id_type} id = new {id_type}({list_of_primary_keys[:-2]});\n")
+            if num_of_primary_keys == 1:
+                f.write(r'      @PutMapping("/{id}")')
+                f.write("\n")
+                f.write(f"      public {class_name}DTO updateById(@PathVariable {id_type} id, @RequestBody {class_name}DTO {object_name}DTO) {{\n")
             f.write(f"          return {object_name}Service.updateById(id, {object_name}DTO);\n")
             f.write("      }\n\n")
 
-            f.write(r'      @DeleteMapping("/{id}")')
-            f.write("\n")
-            f.write(f"      public void deleteById(@PathVariable {id_type} id) {{\n")
+
+            ### DeleteById
+            if num_of_primary_keys > 1:
+                f.write(f'      @DeleteMapping("{mappingStr}")\n')
+                f.write(f"      public void deleteById({argsStr[:-2]}) {{\n")
+                f.write(f"          {id_type} id = new {id_type}({list_of_primary_keys[:-2]});\n")
+            if num_of_primary_keys == 1:
+                f.write(r'      @DeleteMapping("/{id}")')
+                f.write("\n")
+                f.write(f"      public void deleteById(@PathVariable {id_type} id) {{\n")
             f.write(f"          {object_name}Service.deleteById(id);\n")
             f.write("      }\n\n")
+
+            ### Insert
+            f.write(f'      @PostMapping\n')
+            f.write(f'      public {class_name}DTO insert{class_name} (@RequestBody {class_name}DTO {object_name}DTO) {{\n')
+            f.write(f'          return {object_name}Service.insert{class_name}({object_name}DTO);\n')
+            f.write('       }\n')
 
             f.write("}\n")
         api_logs[table_name] = [f"http://localhost:8080/{table_name}", f"http://localhost:8080/{table_name}/id"]
@@ -600,6 +651,8 @@ for table_index in range(len(db_structure)):
     details = db_structure[table_name]
     primary_keys = determine_primary_keys(details)
 
+    print(table_name, primary_keys)
+
     # Entity
     id_type = generate_entity_class(db_structure, output_dir, package_name, "test_dbo.dbo", many, one,table_name, details, primary_keys)
     print("Entity class generated successfully.")
@@ -617,7 +670,7 @@ for table_index in range(len(db_structure)):
     print("Service class generated successfully.")
 
     # Controller
-    generate_controller_class(db_structure, output_dir, table_index, package_name, id_type, api_logs)
+    generate_controller_class(db_structure, output_dir, table_index, package_name, id_type, api_logs, primary_keys)
     print("Controller class generated successfully.")
 
 #Saving API logs

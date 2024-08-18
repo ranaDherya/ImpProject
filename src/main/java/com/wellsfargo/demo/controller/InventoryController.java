@@ -33,4 +33,8 @@ public class InventoryController {
           inventoryService.deleteById(id);
       }
 
+      @PostMapping
+      public InventoryDTO insertInventory (@RequestBody InventoryDTO inventoryDTO) {
+          return inventoryService.insertInventory(inventoryDTO);
+       }
 }

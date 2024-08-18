@@ -9,4 +9,5 @@ List<LanguageDTO> findAll();
 List<LanguageDTO> findById(Integer id);
 LanguageDTO updateById(Integer id, LanguageDTO languageDTO);
 void deleteById(Integer id);
+LanguageDTO insertLanguage(LanguageDTO languageDTO);
 }

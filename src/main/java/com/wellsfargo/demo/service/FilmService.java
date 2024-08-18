@@ -9,4 +9,5 @@ List<FilmDTO> findAll();
 List<FilmDTO> findById(Integer id);
 FilmDTO updateById(Integer id, FilmDTO filmDTO);
 void deleteById(Integer id);
+FilmDTO insertFilm(FilmDTO filmDTO);
 }

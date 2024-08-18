@@ -57,4 +57,11 @@ public class StoreServiceImpl implements StoreService {
            }
        }
 
+      @Override
+      public StoreDTO insertStore (StoreDTO storeDTO) {
+          Store store = storeDTO.convertToEntity();
+          Store savedStore = storeRepository.save(store);
+          return StoreDTO.convertToDTO(savedStore);
+      }
+
 }

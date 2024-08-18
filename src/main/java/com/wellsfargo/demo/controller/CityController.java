@@ -33,4 +33,8 @@ public class CityController {
           cityService.deleteById(id);
       }
 
+      @PostMapping
+      public CityDTO insertCity (@RequestBody CityDTO cityDTO) {
+          return cityService.insertCity(cityDTO);
+       }
 }

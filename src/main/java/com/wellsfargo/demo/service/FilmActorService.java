@@ -11,4 +11,5 @@ List<FilmActorDTO> findAll();
 List<FilmActorDTO> findById(FilmActorId id);
 FilmActorDTO updateById(FilmActorId id, FilmActorDTO filmActorDTO);
 void deleteById(FilmActorId id);
+FilmActorDTO insertFilmActor(FilmActorDTO filmActorDTO);
 }

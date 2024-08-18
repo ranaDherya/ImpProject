@@ -9,4 +9,5 @@ List<CategoryDTO> findAll();
 List<CategoryDTO> findById(Integer id);
 CategoryDTO updateById(Integer id, CategoryDTO categoryDTO);
 void deleteById(Integer id);
+CategoryDTO insertCategory(CategoryDTO categoryDTO);
 }

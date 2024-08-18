@@ -59,4 +59,11 @@ public class FilmCategoryServiceImpl implements FilmCategoryService {
            }
        }
 
+      @Override
+      public FilmCategoryDTO insertFilmCategory (FilmCategoryDTO filmCategoryDTO) {
+          FilmCategory filmCategory = filmCategoryDTO.convertToEntity();
+          FilmCategory savedFilmCategory = filmCategoryRepository.save(filmCategory);
+          return FilmCategoryDTO.convertToDTO(savedFilmCategory);
+      }
+
 }

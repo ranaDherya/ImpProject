@@ -33,4 +33,8 @@ public class CustomerController {
           customerService.deleteById(id);
       }
 
+      @PostMapping
+      public CustomerDTO insertCustomer (@RequestBody CustomerDTO customerDTO) {
+          return customerService.insertCustomer(customerDTO);
+       }
 }

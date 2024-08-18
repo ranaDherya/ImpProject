@@ -33,4 +33,8 @@ public class FilmController {
           filmService.deleteById(id);
       }
 
+      @PostMapping
+      public FilmDTO insertFilm (@RequestBody FilmDTO filmDTO) {
+          return filmService.insertFilm(filmDTO);
+       }
 }

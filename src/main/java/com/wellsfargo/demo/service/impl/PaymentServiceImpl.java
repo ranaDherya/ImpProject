@@ -57,4 +57,11 @@ public class PaymentServiceImpl implements PaymentService {
            }
        }
 
+      @Override
+      public PaymentDTO insertPayment (PaymentDTO paymentDTO) {
+          Payment payment = paymentDTO.convertToEntity();
+          Payment savedPayment = paymentRepository.save(payment);
+          return PaymentDTO.convertToDTO(savedPayment);
+      }
+
 }

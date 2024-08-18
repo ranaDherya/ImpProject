@@ -9,4 +9,5 @@ List<CountryDTO> findAll();
 List<CountryDTO> findById(Integer id);
 CountryDTO updateById(Integer id, CountryDTO countryDTO);
 void deleteById(Integer id);
+CountryDTO insertCountry(CountryDTO countryDTO);
 }

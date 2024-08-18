@@ -33,4 +33,8 @@ public class ActorController {
           actorService.deleteById(id);
       }
 
+      @PostMapping
+      public ActorDTO insertActor (@RequestBody ActorDTO actorDTO) {
+          return actorService.insertActor(actorDTO);
+       }
 }

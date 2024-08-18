@@ -33,4 +33,8 @@ public class StaffController {
           staffService.deleteById(id);
       }
 
+      @PostMapping
+      public StaffDTO insertStaff (@RequestBody StaffDTO staffDTO) {
+          return staffService.insertStaff(staffDTO);
+       }
 }

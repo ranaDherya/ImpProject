@@ -19,20 +19,27 @@ public class FilmActorController {
       public List<FilmActorDTO> findAll() {
           return filmActorService.findAll();
       }
-      @GetMapping("/{id}")
-      public List<FilmActorDTO> findById(@PathVariable FilmActorId id){
+      @GetMapping("/{actorId}/{filmId}")
+      public List<FilmActorDTO> findById(@PathVariable Integer actorId, @PathVariable Integer filmId){
+          FilmActorId id = new FilmActorId(actorId, filmId);
           List<FilmActorDTO> filmActor = filmActorService.findById(id);
           return filmActor.isEmpty() ? null : filmActor;
       }
 
-      @PutMapping("/{id}")
-      public FilmActorDTO updateById(@PathVariable FilmActorId id, @RequestBody FilmActorDTO filmActorDTO) {
+      @PutMapping("/{actorId}/{filmId}")
+      public FilmActorDTO updateById(@PathVariable Integer actorId, @PathVariable Integer filmId,  @RequestBody FilmActorDTO filmActorDTO) {
+          FilmActorId id = new FilmActorId(actorId, filmId);
           return filmActorService.updateById(id, filmActorDTO);
       }
 
-      @DeleteMapping("/{id}")
-      public void deleteById(@PathVariable FilmActorId id) {
+      @DeleteMapping("/{actorId}/{filmId}")
+      public void deleteById(@PathVariable Integer actorId, @PathVariable Integer filmId) {
+          FilmActorId id = new FilmActorId(actorId, filmId);
           filmActorService.deleteById(id);
       }
 
+      @PostMapping
+      public FilmActorDTO insertFilmActor (@RequestBody FilmActorDTO filmActorDTO) {
+          return filmActorService.insertFilmActor(filmActorDTO);
+       }
 }

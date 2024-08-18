@@ -33,4 +33,8 @@ public class RentalController {
           rentalService.deleteById(id);
       }
 
+      @PostMapping
+      public RentalDTO insertRental (@RequestBody RentalDTO rentalDTO) {
+          return rentalService.insertRental(rentalDTO);
+       }
 }

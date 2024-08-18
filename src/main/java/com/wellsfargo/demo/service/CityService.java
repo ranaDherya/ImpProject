@@ -9,4 +9,5 @@ List<CityDTO> findAll();
 List<CityDTO> findById(Integer id);
 CityDTO updateById(Integer id, CityDTO cityDTO);
 void deleteById(Integer id);
+CityDTO insertCity(CityDTO cityDTO);
 }

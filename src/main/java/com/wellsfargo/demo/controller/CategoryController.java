@@ -33,4 +33,8 @@ public class CategoryController {
           categoryService.deleteById(id);
       }
 
+      @PostMapping
+      public CategoryDTO insertCategory (@RequestBody CategoryDTO categoryDTO) {
+          return categoryService.insertCategory(categoryDTO);
+       }
 }

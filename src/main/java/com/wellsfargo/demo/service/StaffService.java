@@ -9,4 +9,5 @@ List<StaffDTO> findAll();
 List<StaffDTO> findById(Integer id);
 StaffDTO updateById(Integer id, StaffDTO staffDTO);
 void deleteById(Integer id);
+StaffDTO insertStaff(StaffDTO staffDTO);
 }

@@ -57,4 +57,11 @@ public class InventoryServiceImpl implements InventoryService {
            }
        }
 
+      @Override
+      public InventoryDTO insertInventory (InventoryDTO inventoryDTO) {
+          Inventory inventory = inventoryDTO.convertToEntity();
+          Inventory savedInventory = inventoryRepository.save(inventory);
+          return InventoryDTO.convertToDTO(savedInventory);
+      }
+
 }

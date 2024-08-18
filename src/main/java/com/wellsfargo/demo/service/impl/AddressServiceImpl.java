@@ -57,4 +57,11 @@ public class AddressServiceImpl implements AddressService {
            }
        }
 
+      @Override
+      public AddressDTO insertAddress (AddressDTO addressDTO) {
+          Address address = addressDTO.convertToEntity();
+          Address savedAddress = addressRepository.save(address);
+          return AddressDTO.convertToDTO(savedAddress);
+      }
+
 }

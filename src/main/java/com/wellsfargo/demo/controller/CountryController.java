@@ -33,4 +33,8 @@ public class CountryController {
           countryService.deleteById(id);
       }
 
+      @PostMapping
+      public CountryDTO insertCountry (@RequestBody CountryDTO countryDTO) {
+          return countryService.insertCountry(countryDTO);
+       }
 }

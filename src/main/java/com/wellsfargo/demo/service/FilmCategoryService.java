@@ -11,4 +11,5 @@ List<FilmCategoryDTO> findAll();
 List<FilmCategoryDTO> findById(FilmCategoryId id);
 FilmCategoryDTO updateById(FilmCategoryId id, FilmCategoryDTO filmCategoryDTO);
 void deleteById(FilmCategoryId id);
+FilmCategoryDTO insertFilmCategory(FilmCategoryDTO filmCategoryDTO);
 }

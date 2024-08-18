@@ -9,4 +9,5 @@ List<RentalDTO> findAll();
 List<RentalDTO> findById(Integer id);
 RentalDTO updateById(Integer id, RentalDTO rentalDTO);
 void deleteById(Integer id);
+RentalDTO insertRental(RentalDTO rentalDTO);
 }

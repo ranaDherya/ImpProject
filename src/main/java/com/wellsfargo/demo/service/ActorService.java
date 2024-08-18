@@ -9,4 +9,5 @@ List<ActorDTO> findAll();
 List<ActorDTO> findById(Integer id);
 ActorDTO updateById(Integer id, ActorDTO actorDTO);
 void deleteById(Integer id);
+ActorDTO insertActor(ActorDTO actorDTO);
 }

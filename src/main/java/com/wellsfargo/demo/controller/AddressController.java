@@ -33,4 +33,8 @@ public class AddressController {
           addressService.deleteById(id);
       }
 
+      @PostMapping
+      public AddressDTO insertAddress (@RequestBody AddressDTO addressDTO) {
+          return addressService.insertAddress(addressDTO);
+       }
 }

@@ -57,4 +57,11 @@ public class RentalServiceImpl implements RentalService {
            }
        }
 
+      @Override
+      public RentalDTO insertRental (RentalDTO rentalDTO) {
+          Rental rental = rentalDTO.convertToEntity();
+          Rental savedRental = rentalRepository.save(rental);
+          return RentalDTO.convertToDTO(savedRental);
+      }
+
 }
